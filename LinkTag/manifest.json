@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "LinkTag Pro Workspace",
+  "version": "1.0.0",
+  "description": "Production-grade, secure Chrome extension for capturing LinkedIn profile metadata and syncing tags to Google Sheets.",
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://script.google.com/*",
+    "https://script.googleusercontent.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LinkTag Pro Workspace",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

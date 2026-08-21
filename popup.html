@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TagSilo Pro Workspace</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="popup-container">
+    
+    <!-- Success Toast Notification -->
+    <div id="syncToast" class="sync-toast">
+      <div class="toast-msg-wrap">
+        <span class="toast-icon">✓</span>
+        <span id="toastMessage" class="toast-text">Profile Synced to Google Sheet!</span>
+      </div>
+      <a id="toastSheetLink" class="toast-link" href="#" target="_blank">View Sheet</a>
+    </div>
+
+    <!-- Top Header -->
+    <header class="popup-header">
+      <div class="brand-wrapper">
+        <div class="brand-logo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6H20M12 6V18M7 18H17" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="17" cy="18" r="3.5" fill="#FF0055"/>
+          </svg>
+        </div>
+        <h1 class="brand-title">TagSilo Pro</h1>
+        <span id="headerTierBadge" class="tier-badge free">FREE</span>
+      </div>
+      <div class="header-actions">
+        <div id="dailyCapPill" class="daily-cap-pill" title="Daily profile saves usage">
+          <span id="dailyCapIcon">⚡</span>
+          <span id="dailyCapText">0/3</span>
+        </div>
+        <button id="openOptionsBtn" class="icon-btn" title="Open Settings & Tag Manager">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Main Content -->
+    <main class="popup-content">
+      
+      <!-- 1. Google 1-Click Identity Section -->
+      <section id="googleAuthSection" class="glass-card identity-card">
+        <button id="googleSignInBtn" class="google-signin-btn">
+          <svg class="google-icon" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>1-Click Google Sign-In</span>
+        </button>
+
+        <div id="googleUserBar" class="user-profile-bar" style="display: none; width: 100%;">
+          <img id="userAvatarImg" class="user-avatar" src="" alt="Google Profile" style="display: none;">
+          <div id="userAvatarPlaceholder" class="user-avatar user-avatar-ph">G</div>
+          <div class="user-meta">
+            <span id="userEmailText" class="user-email">user@gmail.com</span>
+            <span class="auth-status-tag">Connected & Authorized</span>
+          </div>
+          <button id="disconnectGoogleBtn" class="icon-btn" title="Disconnect Google Account">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. Target Profile Card with Compact Avatar & Full Name & URL -->
+      <section class="glass-card">
+        <div class="card-label">
+          <span>Target Profile</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <div id="detectStatusBadge" class="live-badge">
+              <span class="live-pulse"></span>
+              <span id="detectStatusText">Scanning Profile...</span>
+            </div>
+            <button id="refreshMetaBtn" class="icon-btn" title="Refresh Profile Data">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="profile-header-row">
+          <img id="leadAvatarImg" class="profile-avatar" alt="Profile Avatar" referrerpolicy="no-referrer" style="display: none;">
+          <div id="leadAvatarPlaceholder" class="profile-avatar profile-avatar-ph">?</div>
+          <div class="profile-meta-text">
+            <input type="text" id="leadNameInput" class="profile-name-input" placeholder="Lead Full Name..." autocomplete="off">
+            <div id="profileJobTitle" class="profile-title">Scanning Headline...</div>
+          </div>
+        </div>
+
+        <div id="profileUrlBadge" class="profile-url-badge">https://linkedin.com</div>
+        <div id="profileEmailBadge" class="profile-url-badge profile-email-badge">Email: Searching...</div>
+
+        <div id="alreadyTaggedBanner" class="already-tagged-banner" style="display: none;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div class="tagged-info-text">
+            <strong style="display: block; font-size: 0.775rem; color: #38bdf8;">Already Saved</strong>
+            <span id="taggedDateText" style="font-size: 0.7rem; opacity: 0.9;">Record found in Google Sheet</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Pipeline Group Selection Dropdown -->
+      <section class="glass-card">
+        <div class="card-label">
+          <span>Pipeline Group</span>
+        </div>
+        <select id="groupSelect" class="glass-select">
+          <option value="">-- Select a Pipeline Group --</option>
+        </select>
+      </section>
+
+      <!-- 4. Active Tags Box -->
+      <section class="glass-card">
+        <div class="card-label">
+          <span>Active Tags (<span id="activeCountLabel">0</span>)</span>
+          <span id="tagLimitCounter" style="font-size: 0.7rem; color: var(--text-muted);">0/2 Selected</span>
+        </div>
+        <div id="activeTagsBox" class="active-tags-box">
+          <span class="empty-tags-hint">No tags attached. Select quick tags below!</span>
+        </div>
+        <div class="custom-tag-row">
+          <input type="text" id="customActiveTagInput" class="mini-input" placeholder="Add custom tag..." maxlength="25">
+          <button id="addActiveTagBtn" class="mini-add-btn">+ Add</button>
+        </div>
+        <div id="inlineTagLimitBanner" class="tag-limit-warning">
+          <span>⚠️ Free tier limited to 2 active tags. Upgrade to Pro for unlimited tags!</span>
+        </div>
+      </section>
+
+      <!-- 5. Quick Add Tags Grid -->
+      <section class="glass-card">
+        <div class="card-label">
+          <span>Quick Add Tags</span>
+        </div>
+        <div id="quickTagsGrid" class="quick-tags-grid">
+          <!-- Populated dynamically from storage -->
+        </div>
+      </section>
+
+      <!-- 6. Notes & Context Canvas -->
+      <section class="glass-card">
+        <div class="card-label">
+          <span>Notes & Context</span>
+          <span id="charCountLabel" style="font-size: 0.7rem; color: var(--text-dim);">0/500</span>
+        </div>
+        <textarea id="leadNotesInput" class="notes-textarea" placeholder="Add custom contact notes, mutual connections, or follow-up tasks..." maxlength="500"></textarea>
+      </section>
+
+    </main>
+
+    <!-- Footer Actions -->
+    <footer class="popup-footer">
+      <button id="primarySyncBtn" class="sync-btn">
+        <span id="syncBtnSpinner" class="spinner" style="display: none;"></span>
+        <span id="syncBtnIcon">⚡</span>
+        <span id="syncBtnText">Sync to Google Sheets</span>
+      </button>
+      <a id="sheetShortcutLink" class="sheet-shortcut-link" style="display: none;" target="_blank">View Your TagSilo Google Sheet ↗</a>
+    </footer>
+
+    <!-- Paywall Slide-Up Modal (Strictly hidden for Pro users) -->
+    <div id="paywallModalOverlay" class="paywall-modal-overlay" style="display: none !important;">
+      <div class="paywall-card-wrapper">
+        <div class="paywall-header">
+          <span class="paywall-badge">PRO FEATURE LOCK</span>
+          <button id="closePaywallBtn" class="close-modal-btn" title="Dismiss">✕</button>
+        </div>
+
+        <h3 class="paywall-title">Unlock Unlimited TagSilo Pro</h3>
+        <p id="paywallDynamicMessage" class="paywall-message-text">
+          You have reached your 3 daily profile saves on TagSilo Free. Upgrade to Pro for $9.99/mo to unlock unlimited tracking pipelines.
+        </p>
+
+        <div class="paywall-perks-list">
+          <div class="perk-item"><span class="perk-icon">✓</span> <span>Unlimited Daily Profile Synchronizations</span></div>
+          <div class="perk-item"><span class="perk-icon">✓</span> <span>Custom Pipeline Groups & Routing Workflows</span></div>
+          <div class="perk-item"><span class="perk-icon">✓</span> <span>Unlimited Simultaneous Tag Badges</span></div>
+        </div>
+
+        <a id="creemCheckoutBtn" href="https://creem.io/checkout/tagsilo-pro" target="_blank" class="upgrade-cta-btn">
+          <span>🚀 Upgrade to Pro for $9.99/mo</span>
+        </a>
+
+        <div id="enterLicenseLink" class="license-entry-link">
+          Already have a License Key or Promo Code? Enter it in Settings
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkTag Pro Workspace Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-container">
+    
+    <!-- Top Header -->
+    <header class="header-card">
+      <div class="brand-wrapper">
+        <img src="icons/icon-48.png" alt="LinkTag Pro Logo" class="brand-logo">
+        <div>
+          <h1 class="brand-title">LinkTag Pro Workspace</h1>
+          <p class="brand-subtitle">Google Sheets Sync, Quick Tags & Pipeline Manager</p>
+        </div>
+      </div>
+      <span class="badge-v3">Manifest V3</span>
+    </header>
+
+    <!-- Google Apps Script Settings Card -->
+    <section class="card">
+      <h2 class="card-title">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+        </svg>
+        Google Web App Integration
+      </h2>
+      <p class="card-desc">
+        Enter your Google Apps Script Web App Deployment URL below. Requests use CORS preflight firewall bypass headers to ensure reliable transmission.
+      </p>
+
+      <div class="form-group">
+        <label for="webhookUrl" class="input-label">Google Web App Endpoint URL</label>
+        <div class="input-wrapper">
+          <input type="url" id="webhookUrl" class="input-field" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+          <button id="saveUrlBtn" class="btn btn-primary">Save URL</button>
+          <button id="testUrlBtn" class="btn btn-secondary">Test Connection</button>
+        </div>
+      </div>
+
+      <div id="webhookAlert" class="alert-banner"></div>
+    </section>
+
+    <!-- Pipeline Group Manager Card -->
+    <section class="card">
+      <h2 class="card-title">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+        Pipeline Group Manager
+      </h2>
+      <p class="card-desc">
+        Configure custom pipeline categories stored under <code>pipeline_groups</code>. These options dynamically populate the Target Group dropdown selector inside the popup window.
+      </p>
+
+      <div class="tag-manager-wrapper">
+        <div class="form-group">
+          <label for="newGroupInput" class="input-label">Add New Pipeline Group</label>
+          <div class="input-wrapper">
+            <input type="text" id="newGroupInput" class="input-field" placeholder="e.g., Inbound Leads, Prospecting, Active Clients..." maxlength="30">
+            <button id="addGroupBtn" class="btn btn-primary">+ Add Group</button>
+          </div>
+        </div>
+
+        <div id="groupContainer" class="tag-list-container">
+          <!-- Dynamic group badges populated by options.js -->
+        </div>
+      </div>
+
+      <div id="groupAlert" class="alert-banner"></div>
+    </section>
+
+    <!-- Quick Add Tag Manager Card -->
+    <section class="card">
+      <h2 class="card-title">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+        </svg>
+        Quick Add Tag Manager
+      </h2>
+      <p class="card-desc">
+        Create reusable tag badges stored in <code>quick_tags</code>. Click a badge in the extension popup to instantly attach or remove tags for profile tagging.
+      </p>
+
+      <div class="tag-manager-wrapper">
+        <div class="form-group">
+          <label for="newTagInput" class="input-label">Add New Quick Tag Label</label>
+          <div class="input-wrapper">
+            <input type="text" id="newTagInput" class="input-field" placeholder="e.g., Tech Lead, Warm Lead, Recruiter..." maxlength="30">
+            <button id="addTagBtn" class="btn btn-primary">Add Tag</button>
+          </div>
+        </div>
+
+        <div id="tagContainer" class="tag-list-container">
+          <!-- Dynamic tag badges populated by options.js -->
+        </div>
+      </div>
+
+      <div id="tagAlert" class="alert-banner"></div>
+    </section>
+
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
