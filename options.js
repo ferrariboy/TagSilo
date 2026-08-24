@@ -286,26 +286,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // 2. Direct Google OAuth 2.0 Flow via launchWebAuthFlow
+    // 2. Enterprise Backend OAuth Proxy via launchWebAuthFlow
     if (interactive) {
-      const redirectUrl = "https://" + chrome.runtime.id + ".chromiumapp.org/google";
-      const manifestClientId = chrome.runtime.getManifest().oauth2?.client_id || "1087305619025-un37jr32jn77k6ah4rjc0rlgqekbranf.apps.googleusercontent.com";
-      const { custom_google_client_id } = await chrome.storage.local.get("custom_google_client_id");
-      const clientId = custom_google_client_id || manifestClientId;
-
-      const scopes = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive.file",
-        "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/userinfo.profile"
-      ].join(" ");
-
-      const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${encodeURIComponent(clientId)}&response_type=token&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent(scopes)}`;
+      const returnUrl = chrome.identity.getRedirectURL("auth");
+      const authEndpoint = `${serverBaseUrl}/api/auth/google?redirect_to=${encodeURIComponent(returnUrl)}&chrome_id=${encodeURIComponent(chrome.runtime.id)}`;
 
       return new Promise((resolve, reject) => {
         chrome.identity.launchWebAuthFlow(
           {
-            url: authUrl,
+            url: authEndpoint,
             interactive: true
           },
           async (responseUrl) => {
@@ -315,23 +304,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             try {
               const urlObj = new URL(responseUrl);
-              const hashParams = new URLSearchParams(urlObj.hash.substring(1));
-              const accessToken = hashParams.get("access_token") || new URLSearchParams(urlObj.search).get("access_token");
+              const errParam = urlObj.searchParams.get("error");
+              if (errParam) {
+                return reject(new Error(urlObj.searchParams.get("error_description") || errParam));
+              }
+
+              const accessToken = urlObj.searchParams.get("token") || urlObj.searchParams.get("access_token");
+              const refreshToken = urlObj.searchParams.get("refresh_token") || "";
+              const userRaw = urlObj.searchParams.get("user");
 
               if (!accessToken) {
                 return reject(new Error("No access token found in OAuth redirect response."));
               }
 
               let userProfile = null;
-              try {
-                const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-                  headers: { Authorization: `Bearer ${accessToken}` }
-                });
-                if (userRes.ok) {
-                  userProfile = await userRes.json();
-                }
-              } catch (e) {
-                console.warn("[TagSilo Options] Could not fetch user profile:", e);
+              if (userRaw) {
+                try {
+                  userProfile = JSON.parse(decodeURIComponent(userRaw));
+                } catch (e) {}
+              }
+
+              if (!userProfile || !userProfile.email) {
+                try {
+                  const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                  });
+                  if (userRes.ok) {
+                    userProfile = await userRes.json();
+                  }
+                } catch (e) {}
               }
 
               const googleUser = {
@@ -345,7 +346,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
               await chrome.storage.local.set({
                 tagsilo_google_access_token: accessToken,
-                tagsilo_google_user: googleUser
+                tagsilo_google_user: googleUser,
+                tagsilo_google_refresh_token: refreshToken
               });
 
               resolve({
