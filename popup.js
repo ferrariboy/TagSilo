@@ -6,7 +6,8 @@
  * Live GET /api/profile-status Verification, POST /api/checkout, and Anti-Duplicate Sync.
  */
 
-const DEFAULT_VERCEL_URL = "https://temporary-instant-sable-4evp3vd.vercel.app";
+const DEFAULT_VERCEL_URL = "https://tagsilo.vercel.app";
+const DEFAULT_SUPABASE_URL = "https://wrmzlyffpfdnphmqujfe.supabase.co";
 
 const DEFAULT_TAGS = [
   "High Priority",

@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
 
     const proto = req.headers["x-forwarded-proto"] || "https";
-    const host = req.headers["x-forwarded-host"] || req.headers.host || "temporary-instant-sable-4evp3vd.vercel.app";
+    const host = req.headers["x-forwarded-host"] || req.headers.host || "tagsilo.vercel.app";
     const callbackUrl = `${proto}://${host}/api/auth/callback`;
 
     // 1. Exchange Code for Access Token + Refresh Token via Google OAuth API

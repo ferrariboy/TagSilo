@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
 
     // Detect server host for dynamic callback resolution
     const proto = req.headers["x-forwarded-proto"] || "https";
-    const host = req.headers["x-forwarded-host"] || req.headers.host || "temporary-instant-sable-4evp3vd.vercel.app";
+    const host = req.headers["x-forwarded-host"] || req.headers.host || "tagsilo.vercel.app";
     const callbackUrl = `${proto}://${host}/api/auth/callback`;
 
     // Encode state containing extension callback target and metadata

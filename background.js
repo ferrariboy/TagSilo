@@ -4,7 +4,7 @@
  * Express Backend API Connector, and /overlay/contact-info/ Asynchronous Fetch Relay.
  */
 
-const DEFAULT_BACKEND_ENDPOINT = "https://temporary-instant-sable-4evp3vd.vercel.app";
+const DEFAULT_BACKEND_ENDPOINT = "https://tagsilo.vercel.app";
 
 // Initialize default storage on installation
 chrome.runtime.onInstalled.addListener(async () => {

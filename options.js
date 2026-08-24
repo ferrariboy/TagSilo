@@ -5,7 +5,7 @@
  * Creem Discount/Promo Code validation, and pipeline taxonomy (tags & groups) with freemium input gating.
  */
 
-const DEFAULT_SERVER_URL = "https://temporary-instant-sable-4evp3vd.vercel.app";
+const DEFAULT_SERVER_URL = "https://tagsilo.vercel.app";
 
 document.addEventListener("DOMContentLoaded", async () => {
   // DOM References
