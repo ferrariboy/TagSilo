@@ -136,8 +136,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     await performLicenseCheck(currentKey);
 
     // Tags & Groups
-    const rawTags = syncData.quick_tags || syncData.tagsilo_tags || localData.quick_tags || localData.tagsilo_tags || (isProUser ? [...DEFAULT_TAGS] : ["High Priority", "Executive"]);
-    tagsList = rawTags.map(cleanTag);
+    const isInitialized = syncData.quick_tags_initialized || localData.quick_tags_initialized;
+    const rawTags = (syncData.quick_tags !== undefined) ? syncData.quick_tags :
+                    (syncData.tagsilo_tags !== undefined) ? syncData.tagsilo_tags :
+                    (localData.quick_tags !== undefined) ? localData.quick_tags :
+                    (localData.tagsilo_tags !== undefined) ? localData.tagsilo_tags :
+                    (isInitialized ? [] : DEFAULT_TAGS);
+    tagsList = (Array.isArray(rawTags) ? rawTags : []).map(cleanTag).filter(Boolean);
     groupsList = syncData.pipeline_groups || syncData.tagsilo_groups || localData.pipeline_groups || localData.tagsilo_groups || (isProUser ? [...DEFAULT_GROUPS] : ["Prospects"]);
 
     renderTagsList();

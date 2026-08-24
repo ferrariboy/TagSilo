@@ -261,18 +261,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       ]);
     } catch (e) {}
 
+    let isInitialized = syncData.quick_tags_initialized || localData.quick_tags_initialized;
     let rawTags = syncData.quick_tags || syncData.tagsilo_tags || localData.quick_tags || localData.tagsilo_tags;
-    if (!Array.isArray(rawTags) || rawTags.length === 0) {
+
+    if (!Array.isArray(rawTags) && !isInitialized) {
       rawTags = DEFAULT_TAGS;
       try {
-        await chrome.storage.local.set({ quick_tags: DEFAULT_TAGS, tagsilo_tags: DEFAULT_TAGS });
+        await chrome.storage.local.set({ quick_tags: DEFAULT_TAGS, tagsilo_tags: DEFAULT_TAGS, quick_tags_initialized: true });
+        await chrome.storage.sync.set({ quick_tags: DEFAULT_TAGS, tagsilo_tags: DEFAULT_TAGS, quick_tags_initialized: true });
       } catch (e) {}
+    } else if (!Array.isArray(rawTags)) {
+      rawTags = [];
     }
 
-    quickTags = rawTags.map(cleanTag).filter(Boolean);
-    if (quickTags.length === 0) {
-      quickTags = [...DEFAULT_TAGS];
-    }
+    quickTags = (rawTags || []).map(cleanTag).filter(Boolean);
 
     let rawGroups = syncData.pipeline_groups || syncData.tagsilo_groups || localData.pipeline_groups || localData.tagsilo_groups;
     if (!Array.isArray(rawGroups) || rawGroups.length === 0) {
@@ -776,11 +778,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     activeTags.add(text);
-    if (!quickTags.includes(text)) {
+    if (!quickTags.some((t) => cleanTag(t) === text)) {
       quickTags.push(text);
-      await chrome.storage.local.set({ quick_tags: quickTags, tagsilo_tags: quickTags });
+      await chrome.storage.local.set({ quick_tags: quickTags, tagsilo_tags: quickTags, quick_tags_initialized: true });
       try {
-        await chrome.storage.sync.set({ quick_tags: quickTags, tagsilo_tags: quickTags });
+        await chrome.storage.sync.set({ quick_tags: quickTags, tagsilo_tags: quickTags, quick_tags_initialized: true });
       } catch (err) {}
       renderQuickTags();
     }
@@ -808,14 +810,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!quickTagsGrid) return;
     quickTagsGrid.innerHTML = "";
     if (!quickTags || quickTags.length === 0) {
-      quickTags = [
-        "High Priority",
-        "Executive",
-        "Warm Intro",
-        "Founder",
-        "Technical",
-        "Decision Maker"
-      ];
+      const emptyHint = document.createElement("div");
+      emptyHint.className = "empty-presets-hint";
+      emptyHint.textContent = "No quick presets. Add custom tags above to create presets.";
+      emptyHint.style.cssText = "font-size: 0.66rem; color: var(--text-tertiary); font-style: italic; padding: 2px 0;";
+      quickTagsGrid.appendChild(emptyHint);
+      updateTagCounterLabel();
+      return;
     }
 
     quickTags.forEach((rawTag) => {
@@ -843,9 +844,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         e.preventDefault();
         e.stopPropagation();
         quickTags = quickTags.filter((t) => cleanTag(t) !== tag);
-        await chrome.storage.local.set({ quick_tags: quickTags, tagsilo_tags: quickTags });
+        await chrome.storage.local.set({ quick_tags: quickTags, tagsilo_tags: quickTags, quick_tags_initialized: true });
         try {
-          await chrome.storage.sync.set({ quick_tags: quickTags, tagsilo_tags: quickTags });
+          await chrome.storage.sync.set({ quick_tags: quickTags, tagsilo_tags: quickTags, quick_tags_initialized: true });
         } catch (err) {}
         renderQuickTags();
       });
@@ -1869,90 +1870,26 @@ async function extractLinkedInMetadataInPage() {
     } catch (e) {}
   }
 
-  // 6C. Contact Modal Pop-up & Email Extraction (Triggered on Demand)
-  if (!email) {
+  // 6C. Asynchronous Background Contact Info Fetch (Zero UI click, Zero photo popup, Zero navigation loop)
+  if (!email && location.hostname.includes("linkedin.com") && location.pathname.includes("/in/")) {
     try {
-      // First check if modal is already open in DOM
-      const existingModal = document.querySelector(".pv-contact-info") ||
-                            document.querySelector("section.ci-email") ||
-                            document.querySelector("#pv-contact-info") ||
-                            document.querySelector(".artdeco-modal");
-      if (existingModal) {
-        const mailtoModal = existingModal.querySelector('a[href^="mailto:"]');
-        if (mailtoModal) {
-          const raw = mailtoModal.href.replace(/^mailto:/i, "").split("?")[0].trim();
-          if (isUserEmail(raw)) email = raw;
-        }
-        if (!email) {
-          const found = findEmailInText(existingModal.innerText || existingModal.innerHTML);
+      const baseUrl = location.origin + location.pathname.replace(/\/overlay\/contact-info\/?.*$/i, "").replace(/\/$/, "");
+      const contactUrl = baseUrl + "/overlay/contact-info/";
+      const response = await fetch(contactUrl, {
+        headers: { "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" },
+        credentials: "include"
+      });
+      if (response.ok) {
+        const htmlText = await response.text();
+        const mailtoMatch = htmlText.match(/href=["']mailto:([^"'?]+)["']/i);
+        if (mailtoMatch && mailtoMatch[1] && isUserEmail(mailtoMatch[1])) {
+          email = mailtoMatch[1].trim();
+        } else {
+          const found = findEmailInText(htmlText);
           if (found) email = found;
         }
       }
-
-      // If not yet found, trigger the Contact Info modal pop-up
-      if (!email) {
-        let contactBtn = document.querySelector('a[href*="contact-info"]') ||
-                         document.querySelector('#top-card-text-details-contact-info') ||
-                         document.querySelector('a[href*="/overlay/contact-info"]') ||
-                         document.querySelector('button[aria-label*="contact info" i]') ||
-                         document.querySelector('a[aria-label*="contact info" i]') ||
-                         document.querySelector('a.ember-view[href*="contact-info"]');
-        if (!contactBtn) {
-          const allLinks = document.querySelectorAll("main a, section a, .pv-text-details__left-panel a, .ph5 a, a, button");
-          for (const l of allLinks) {
-            const txt = (l.innerText || l.textContent || "").trim().toLowerCase();
-            if (txt.includes("contact info")) {
-              contactBtn = l;
-              break;
-            }
-          }
-        }
-        if (contactBtn) {
-          contactBtn.click();
-
-          // Active polling loop for up to 1500ms to allow LinkedIn to mount and render modal contents
-          const startTime = Date.now();
-          while (Date.now() - startTime < 1500) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
-
-            // 1. Direct mailto links in modal or DOM
-            const mailtoLinks = document.querySelectorAll('a[href^="mailto:"]');
-            for (const a of mailtoLinks) {
-              const raw = a.href.replace(/^mailto:/i, "").split("?")[0].trim();
-              if (isUserEmail(raw)) {
-                email = raw;
-                break;
-              }
-            }
-            if (email) break;
-
-            // 2. Search modal container text
-            const poppedModal = document.querySelector(".pv-contact-info") ||
-                                document.querySelector("section.ci-email") ||
-                                document.querySelector("#pv-contact-info") ||
-                                document.querySelector(".artdeco-modal");
-            if (poppedModal) {
-              const found = findEmailInText(poppedModal.innerText || poppedModal.innerHTML);
-              if (found) {
-                email = found;
-                break;
-              }
-            }
-
-            // 3. Search document body text while modal is open
-            if (document.body) {
-              const foundBody = findEmailInText(document.body.innerText || "");
-              if (foundBody) {
-                email = foundBody;
-                break;
-              }
-            }
-          }
-        }
-      }
-    } catch (e) {
-      console.warn("[TagSilo] Contact info modal extraction note:", e);
-    }
+    } catch (err) {}
   }
 
   // 6D. Fallback search in document text
