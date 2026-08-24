@@ -149,34 +149,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Google Sheet Pipeline Check
     await checkGoogleSheetPipeline();
 
-    // OAuth Redirect URI and Custom Client ID Setup
-    const redirectUriDisplay = document.getElementById("redirectUriDisplay");
-    const copyRedirectUriBtn = document.getElementById("copyRedirectUriBtn");
-    const googleClientIdInput = document.getElementById("googleClientIdInput");
-    const saveClientIdBtn = document.getElementById("saveClientIdBtn");
-
-    if (redirectUriDisplay) {
-      redirectUriDisplay.textContent = chrome.identity.getRedirectURL();
-    }
-    if (googleClientIdInput) {
-      const { custom_google_client_id } = await chrome.storage.local.get("custom_google_client_id");
-      if (custom_google_client_id) {
-        googleClientIdInput.value = custom_google_client_id;
-      }
-    }
-    if (copyRedirectUriBtn) {
-      copyRedirectUriBtn.onclick = () => {
-        navigator.clipboard.writeText(chrome.identity.getRedirectURL());
-        showToast("✓ Redirect URI copied to clipboard!");
-      };
-    }
-    if (saveClientIdBtn && googleClientIdInput) {
-      saveClientIdBtn.onclick = async () => {
-        const customId = googleClientIdInput.value.trim();
-        await chrome.storage.local.set({ custom_google_client_id: customId });
-        showToast("✓ Google Client ID saved successfully!");
-      };
-    }
   }
 
   // Google Sheet Pipeline Management
@@ -187,6 +159,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         "tagsilo_sheet_title"
       ]);
 
+      const defaultSheetName = isProUser ? "TagSilo Pro - Leads & Pipelines" : "TagSilo - Leads & Pipelines";
+      const defaultAutoName = isProUser ? "TagSilo Pro - Automated Spreadsheet" : "TagSilo - Automated Spreadsheet";
+
       if (active_google_sheet_id) {
         const sheetUrl = `https://docs.google.com/spreadsheets/d/${active_google_sheet_id}/edit`;
         if (sheetStatusBadge) {
@@ -194,7 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           sheetStatusBadge.className = "sheet-status-badge active";
         }
         if (sheetTitleDisplay) {
-          sheetTitleDisplay.textContent = tagsilo_sheet_title || "TagSilo Pro - Leads & Pipelines";
+          sheetTitleDisplay.textContent = tagsilo_sheet_title || defaultSheetName;
         }
         if (sheetIdDisplay) {
           sheetIdDisplay.textContent = `Spreadsheet ID: ${active_google_sheet_id}`;
@@ -215,7 +190,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           sheetStatusBadge.className = "sheet-status-badge";
         }
         if (sheetTitleDisplay) {
-          sheetTitleDisplay.textContent = "TagSilo Pro - Automated Spreadsheet";
+          sheetTitleDisplay.textContent = defaultAutoName;
         }
         if (sheetIdDisplay) {
           sheetIdDisplay.textContent = "Your spreadsheet will be auto-generated upon syncing your first lead.";

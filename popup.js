@@ -835,8 +835,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       const textSpan = document.createElement("span");
       textSpan.textContent = tag;
 
+      const delSpan = document.createElement("span");
+      delSpan.className = "quick-tag-delete";
+      delSpan.innerHTML = "&times;";
+      delSpan.title = `Delete "${tag}" preset`;
+      delSpan.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        quickTags = quickTags.filter((t) => cleanTag(t) !== tag);
+        await chrome.storage.local.set({ quick_tags: quickTags, tagsilo_tags: quickTags });
+        try {
+          await chrome.storage.sync.set({ quick_tags: quickTags, tagsilo_tags: quickTags });
+        } catch (err) {}
+        renderQuickTags();
+      });
+
       btn.appendChild(dot);
       btn.appendChild(textSpan);
+      btn.appendChild(delSpan);
 
       btn.addEventListener("click", (e) => {
         e.preventDefault();

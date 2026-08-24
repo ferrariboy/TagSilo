@@ -709,7 +709,7 @@ body {
   background: rgba(51, 65, 85, 0.4);
   border: 1px solid var(--border-outer);
   color: var(--text-secondary);
-  padding: 2px 7px;
+  padding: 2px 5px 2px 7px;
   border-radius: var(--radius-pill);
   font-size: 0.68rem;
   font-weight: 500;
@@ -718,6 +718,7 @@ body {
   align-items: center;
   gap: 4px;
   transition: all 0.15s ease;
+  user-select: none;
 }
 
 .quick-tag-btn:hover {
@@ -729,6 +730,26 @@ body {
   background: rgba(37, 99, 235, 0.25);
   border-color: var(--primary-blue);
   color: #93C5FD;
+}
+
+.quick-tag-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--text-tertiary);
+  margin-left: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-tag-delete:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #FCA5A5;
 }
 
 /* 6. Enrichment Notes Textarea */
