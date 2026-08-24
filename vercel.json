@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "name": "tagsilo-pro-api",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
@@ -17,3 +11,4 @@
     }
   ]
 }
+
