@@ -65,13 +65,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentTier = "free";
   let serverBaseUrl = DEFAULT_SERVER_URL;
 
+  function cleanTag(str) {
+    if (!str || typeof str !== "string") return "";
+    return str.replace(/^[\p{Emoji}\p{Symbol}\s]+/gu, "").trim() || str.trim();
+  }
+
   const DEFAULT_TAGS = [
-    "🔥 High Priority",
-    "💼 Executive",
-    "🤝 Warm Intro",
-    "🚀 Founder",
-    "💡 Technical",
-    "🎯 Decision Maker"
+    "High Priority",
+    "Executive",
+    "Warm Intro",
+    "Founder",
+    "Technical",
+    "Decision Maker"
   ];
 
   const DEFAULT_GROUPS = [
@@ -131,7 +136,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     await performLicenseCheck(currentKey);
 
     // Tags & Groups
-    tagsList = syncData.quick_tags || syncData.tagsilo_tags || localData.quick_tags || localData.tagsilo_tags || (isProUser ? [...DEFAULT_TAGS] : ["🔥 High Priority", "💼 Executive"]);
+    const rawTags = syncData.quick_tags || syncData.tagsilo_tags || localData.quick_tags || localData.tagsilo_tags || (isProUser ? [...DEFAULT_TAGS] : ["High Priority", "Executive"]);
+    tagsList = rawTags.map(cleanTag);
     groupsList = syncData.pipeline_groups || syncData.tagsilo_groups || localData.pipeline_groups || localData.tagsilo_groups || (isProUser ? [...DEFAULT_GROUPS] : ["Prospects"]);
 
     renderTagsList();
@@ -142,6 +148,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Google Sheet Pipeline Check
     await checkGoogleSheetPipeline();
+
+    // OAuth Redirect URI and Custom Client ID Setup
+    const redirectUriDisplay = document.getElementById("redirectUriDisplay");
+    const copyRedirectUriBtn = document.getElementById("copyRedirectUriBtn");
+    const googleClientIdInput = document.getElementById("googleClientIdInput");
+    const saveClientIdBtn = document.getElementById("saveClientIdBtn");
+
+    if (redirectUriDisplay) {
+      redirectUriDisplay.textContent = chrome.identity.getRedirectURL();
+    }
+    if (googleClientIdInput) {
+      const { custom_google_client_id } = await chrome.storage.local.get("custom_google_client_id");
+      if (custom_google_client_id) {
+        googleClientIdInput.value = custom_google_client_id;
+      }
+    }
+    if (copyRedirectUriBtn) {
+      copyRedirectUriBtn.onclick = () => {
+        navigator.clipboard.writeText(chrome.identity.getRedirectURL());
+        showToast("✓ Redirect URI copied to clipboard!");
+      };
+    }
+    if (saveClientIdBtn && googleClientIdInput) {
+      saveClientIdBtn.onclick = async () => {
+        const customId = googleClientIdInput.value.trim();
+        await chrome.storage.local.set({ custom_google_client_id: customId });
+        showToast("✓ Google Client ID saved successfully!");
+      };
+    }
   }
 
   // Google Sheet Pipeline Management
@@ -202,39 +237,91 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // 1. Google OAuth Identity Controller
+  // Cross-Browser Google Authorization (Native 1-Click with Backend Serverless Proxy)
   async function authenticateWithGoogle(interactive = true) {
-    const redirectUrl = "https://" + chrome.runtime.id + ".chromiumapp.org/google";
-    const clientId = chrome.runtime.getManifest().oauth2.client_id;
+    // 1. Try Native getAuthToken (Chrome 1-Click)
+    try {
+      const nativeToken = await new Promise((resolve, reject) => {
+        chrome.identity.getAuthToken({ interactive: interactive }, (tok) => {
+          if (chrome.runtime.lastError) {
+            return reject(new Error(chrome.runtime.lastError.message));
+          }
+          if (!tok) {
+            return reject(new Error("No token returned by Google Identity."));
+          }
+          resolve(tok);
+        });
+      });
 
-    if (!clientId || clientId === "PASTE_GOOGLE_OAUTH_CLIENT_ID_HERE") {
-      throw new Error("Please configure your Google OAuth Client ID in manifest.json before signing in.");
+      if (nativeToken) {
+        let userProfile = null;
+        try {
+          const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: { Authorization: `Bearer ${nativeToken}` }
+          });
+          if (userRes.ok) {
+            userProfile = await userRes.json();
+          }
+        } catch (e) {}
+
+        const googleUser = {
+          email: userProfile?.email || "Google Account Connected",
+          name: userProfile?.name || "",
+          picture: userProfile?.picture || "",
+          lastAuth: new Date().toISOString()
+        };
+
+        currentAuthToken = nativeToken;
+
+        await chrome.storage.local.set({
+          tagsilo_google_access_token: nativeToken,
+          tagsilo_google_user: googleUser
+        });
+
+        return { token: nativeToken, user: googleUser };
+      }
+    } catch (nativeErr) {
+      if (!interactive) {
+        throw nativeErr;
+      }
     }
 
-    const scopeStr = "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
-    const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${encodeURIComponent(clientId)}&response_type=token&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent(scopeStr)}`;
+    // 2. Direct Google OAuth 2.0 Flow via launchWebAuthFlow
+    if (interactive) {
+      const redirectUrl = "https://" + chrome.runtime.id + ".chromiumapp.org/google";
+      const manifestClientId = chrome.runtime.getManifest().oauth2?.client_id || "1087305619025-un37jr32jn77k6ah4rjc0rlgqekbranf.apps.googleusercontent.com";
+      const { custom_google_client_id } = await chrome.storage.local.get("custom_google_client_id");
+      const clientId = custom_google_client_id || manifestClientId;
 
-    return new Promise((resolve, reject) => {
-      chrome.identity.launchWebAuthFlow(
-        {
-          url: authUrl,
-          interactive: interactive
-        },
-        (responseUrl) => {
-          if (chrome.runtime.lastError || !responseUrl) {
-            return reject(new Error(chrome.runtime.lastError?.message || "Authentication flow was cancelled."));
-          }
+      const scopes = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile"
+      ].join(" ");
 
-          try {
-            const urlObj = new URL(responseUrl);
-            const hashParams = new URLSearchParams(urlObj.hash.substring(1));
-            const accessToken = hashParams.get("access_token") || new URLSearchParams(urlObj.search).get("access_token");
+      const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${encodeURIComponent(clientId)}&response_type=token&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent(scopes)}`;
 
-            if (!accessToken) {
-              return reject(new Error("No access token found in OAuth redirect response."));
+      return new Promise((resolve, reject) => {
+        chrome.identity.launchWebAuthFlow(
+          {
+            url: authUrl,
+            interactive: true
+          },
+          async (responseUrl) => {
+            if (chrome.runtime.lastError || !responseUrl) {
+              return reject(new Error(chrome.runtime.lastError?.message || "Authentication flow was cancelled."));
             }
 
-            (async () => {
+            try {
+              const urlObj = new URL(responseUrl);
+              const hashParams = new URLSearchParams(urlObj.hash.substring(1));
+              const accessToken = hashParams.get("access_token") || new URLSearchParams(urlObj.search).get("access_token");
+
+              if (!accessToken) {
+                return reject(new Error("No access token found in OAuth redirect response."));
+              }
+
               let userProfile = null;
               try {
                 const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
@@ -265,13 +352,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                 token: accessToken,
                 user: googleUser
               });
-            })();
-          } catch (parseErr) {
-            reject(new Error("Failed to parse token from OAuth callback: " + parseErr.message));
+            } catch (parseErr) {
+              reject(new Error("Failed to parse token from OAuth callback: " + parseErr.message));
+            }
           }
-        }
-      );
-    });
+        );
+      });
+    }
+
+    throw new Error("Silent authentication not available.");
   }
 
   async function checkGoogleIdentity() {
@@ -280,21 +369,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       "tagsilo_google_user"
     ]);
 
-    if (tagsilo_google_access_token) {
-      currentAuthToken = tagsilo_google_access_token;
-      renderAuthUser(tagsilo_google_user || { email: "Google Account Connected" }, tagsilo_google_access_token);
+    // 1. Immediately show stored user profile (persistent session)
+    if (tagsilo_google_user && tagsilo_google_user.email) {
+      currentAuthToken = tagsilo_google_access_token || null;
+      renderAuthUser(tagsilo_google_user, currentAuthToken);
     } else {
       renderUnauthUser();
+      return;
     }
+
+    // 2. Silent validation & background refresh
+    try {
+      const silentAuth = await authenticateWithGoogle(false);
+      if (silentAuth && silentAuth.token) {
+        currentAuthToken = silentAuth.token;
+        renderAuthUser(silentAuth.user, silentAuth.token);
+      }
+    } catch (e) {}
   }
 
   function renderAuthUser(user, token) {
     optSignInBtn.style.display = "none";
     optDisconnectBtn.style.display = "inline-flex";
 
-    optUserName.textContent = user.name || "Google User";
+    optUserName.textContent = user.name || user.email || "Google User";
     optUserEmail.textContent = user.email || "Connected";
     optStatusIndicator.className = "status-indicator active";
+    optStatusIndicator.style.display = "inline-flex";
 
     if (user.picture) {
       optUserAvatarImg.src = user.picture;
@@ -315,6 +416,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     optUserName.textContent = "Not Connected";
     optUserEmail.textContent = "Sign in to enable direct sheet sync";
     optStatusIndicator.className = "status-indicator inactive";
+    optStatusIndicator.style.display = "none";
 
     optUserAvatarImg.style.display = "none";
     optUserAvatarPh.style.display = "flex";
@@ -336,6 +438,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   optDisconnectBtn.addEventListener("click", async () => {
     if (confirm("Disconnect your Google account from TagSilo Pro?")) {
+      if (currentAuthToken) {
+        try {
+          await new Promise((r) => chrome.identity.removeCachedAuthToken({ token: currentAuthToken }, r));
+        } catch (e) {}
+      }
       await chrome.storage.local.remove(["tagsilo_google_access_token", "tagsilo_google_user"]);
       renderUnauthUser();
       showToast("Google Account Disconnected");
@@ -802,12 +909,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function escapeHtml(str) {
-    return (str || "").replace(/[&<>"']/g, (m) => ({
+    if (!str) return "";
+    const map = {
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
       '"': "&quot;",
       "'": "&#039;"
-    }[m]));
+    };
+    return str.replace(/[&<>"']/g, (m) => map[m]);
   }
 });

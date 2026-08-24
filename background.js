@@ -10,12 +10,12 @@ const DEFAULT_BACKEND_ENDPOINT = "https://temporary-instant-sable-4evp3vd.vercel
 chrome.runtime.onInstalled.addListener(async () => {
   const defaults = {
     tagsilo_tags: [
-      "🔥 High Priority",
-      "💼 Executive",
-      "🤝 Warm Intro",
-      "🚀 Founder",
-      "💡 Technical",
-      "🎯 Decision Maker"
+      "High Priority",
+      "Executive",
+      "Warm Intro",
+      "Founder",
+      "Technical",
+      "Decision Maker"
     ],
     tagsilo_groups: [
       "Prospects",

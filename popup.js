@@ -8,13 +8,78 @@
 
 const DEFAULT_VERCEL_URL = "https://temporary-instant-sable-4evp3vd.vercel.app";
 
+const DEFAULT_TAGS = [
+  "High Priority",
+  "Executive",
+  "Warm Intro",
+  "Founder",
+  "Technical",
+  "Decision Maker"
+];
+
+const DEFAULT_GROUPS = [
+  "Prospects",
+  "Investors & Angels",
+  "Talent & Recruiting",
+  "Partnerships",
+  "Key Accounts"
+];
+
+const TAG_COLORS = {
+  "high priority": "#ef4444",
+  "executive": "#a855f7",
+  "warm intro": "#10b981",
+  "founder": "#06b6d4",
+  "technical": "#3b82f6",
+  "decision maker": "#f59e0b"
+};
+
+// Helper to clean tags (strip legacy emojis)
+function cleanTag(str) {
+  if (!str || typeof str !== "string") return "";
+  return str.replace(/^[\p{Emoji}\p{Symbol}\s]+/gu, "").trim() || str.trim();
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+  // Dynamic Version Injection
+  const appVersion = chrome.runtime.getManifest()?.version || "1.2.0";
+  const footerVersionText = document.getElementById("footerVersionText");
+  if (footerVersionText) footerVersionText.textContent = `v${appVersion}`;
+
   // DOM References
   const headerTierBadge = document.getElementById("headerTierBadge");
   const dailyCapPill = document.getElementById("dailyCapPill");
   const dailyCapIcon = document.getElementById("dailyCapIcon");
   const dailyCapText = document.getElementById("dailyCapText");
   const openOptionsBtn = document.getElementById("openOptionsBtn");
+
+  function openSettingsPage(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const optionsUrl = chrome.runtime.getURL("options.html");
+    try {
+      if (chrome.tabs && chrome.tabs.query) {
+        chrome.tabs.query({ url: optionsUrl }, (tabs) => {
+          if (tabs && tabs.length > 0) {
+            chrome.tabs.update(tabs[0].id, { active: true });
+            if (tabs[0].windowId && chrome.windows) {
+              chrome.windows.update(tabs[0].windowId, { focused: true });
+            }
+          } else {
+            chrome.tabs.create({ url: optionsUrl });
+          }
+        });
+        return;
+      }
+    } catch (err) {}
+    chrome.tabs.create({ url: optionsUrl });
+  }
+
+  if (openOptionsBtn) {
+    openOptionsBtn.addEventListener("click", openSettingsPage);
+  }
 
   // Google Auth Elements
   const googleSignInBtn = document.getElementById("googleSignInBtn");
@@ -76,11 +141,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   const enterLicenseLink = document.getElementById("enterLicenseLink");
 
   // Error fallback for avatar image
-  leadAvatarImg.onerror = () => {
-    leadAvatarImg.style.display = "none";
-    leadAvatarPlaceholder.style.display = "flex";
-    leadAvatarPlaceholder.textContent = (leadNameInput.value || "L").charAt(0).toUpperCase();
-  };
+  if (leadAvatarImg) {
+    leadAvatarImg.onerror = () => {
+      leadAvatarImg.style.display = "none";
+      if (leadAvatarPlaceholder) {
+        leadAvatarPlaceholder.style.display = "flex";
+        leadAvatarPlaceholder.textContent = (leadNameInput?.value || "L").charAt(0).toUpperCase();
+      }
+    };
+  }
 
   // App State Variables
   let currentAuthToken = null;
@@ -91,8 +160,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   let maxDaily = 3;
   let isCapped = false;
   let activeTags = new Set();
-  let quickTags = [];
-  let pipelineGroups = [];
+  let quickTags = [...DEFAULT_TAGS];
+  let pipelineGroups = [...DEFAULT_GROUPS];
   let currentProfileUrl = "";
   let currentProfileAvatarUrl = "";
   let currentExtractedHeadline = "";
@@ -101,7 +170,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   let backendApiUrl = DEFAULT_VERCEL_URL;
 
   // 1. Initial State Load & Cache Hydration
-  await initializeApp();
+  try {
+    await initializeApp();
+  } catch (initErr) {
+    console.error("[TagSilo Pro] initializeApp error:", initErr);
+  }
 
   async function initializeApp() {
     // Resolve Vercel / backend server endpoint
@@ -132,8 +205,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           headerTierBadge.className = "tier-badge pro";
         }
         if (dailyCapIcon) dailyCapIcon.textContent = "👑";
-        if (dailyCapText) dailyCapText.textContent = "UNLIMITED SAVES";
-        if (dailyCapPill) dailyCapPill.className = "daily-cap-pill pro-pill";
+        if (dailyCapText) dailyCapText.textContent = "Unlimited Sync";
+        if (dailyCapPill) dailyCapPill.className = "quota-pill pro-pill";
         if (inlineTagLimitBanner) inlineTagLimitBanner.style.display = "none";
         hidePaywallModal();
       }
@@ -174,32 +247,40 @@ document.addEventListener("DOMContentLoaded", async () => {
       syncData = await chrome.storage.sync.get(["quick_tags", "tagsilo_tags", "pipeline_groups", "tagsilo_groups"]);
     } catch (e) {}
 
-    const localData = await chrome.storage.local.get([
-      "quick_tags",
-      "tagsilo_tags",
-      "pipeline_groups",
-      "tagsilo_groups",
-      "tagsilo_google_user",
-      "tagsilo_google_access_token",
-      "creem_license_key"
-    ]);
+    let localData = {};
+    try {
+      localData = await chrome.storage.local.get([
+        "quick_tags",
+        "tagsilo_tags",
+        "pipeline_groups",
+        "tagsilo_groups",
+        "tagsilo_google_user",
+        "tagsilo_google_access_token",
+        "creem_license_key"
+      ]);
+    } catch (e) {}
 
-    quickTags = syncData.quick_tags || syncData.tagsilo_tags || localData.quick_tags || localData.tagsilo_tags || [
-      "🔥 High Priority",
-      "💼 Executive",
-      "🤝 Warm Intro",
-      "🚀 Founder",
-      "💡 Technical",
-      "🎯 Decision Maker"
-    ];
+    let rawTags = syncData.quick_tags || syncData.tagsilo_tags || localData.quick_tags || localData.tagsilo_tags;
+    if (!Array.isArray(rawTags) || rawTags.length === 0) {
+      rawTags = DEFAULT_TAGS;
+      try {
+        await chrome.storage.local.set({ quick_tags: DEFAULT_TAGS, tagsilo_tags: DEFAULT_TAGS });
+      } catch (e) {}
+    }
 
-    pipelineGroups = syncData.pipeline_groups || syncData.tagsilo_groups || localData.pipeline_groups || localData.tagsilo_groups || [
-      "Prospects",
-      "Investors & Angels",
-      "Talent & Recruiting",
-      "Partnerships",
-      "Key Accounts"
-    ];
+    quickTags = rawTags.map(cleanTag).filter(Boolean);
+    if (quickTags.length === 0) {
+      quickTags = [...DEFAULT_TAGS];
+    }
+
+    let rawGroups = syncData.pipeline_groups || syncData.tagsilo_groups || localData.pipeline_groups || localData.tagsilo_groups;
+    if (!Array.isArray(rawGroups) || rawGroups.length === 0) {
+      rawGroups = DEFAULT_GROUPS;
+      try {
+        await chrome.storage.local.set({ pipeline_groups: DEFAULT_GROUPS, tagsilo_groups: DEFAULT_GROUPS });
+      } catch (e) {}
+    }
+    pipelineGroups = rawGroups;
 
     renderPipelineGroups();
     renderQuickTags();
@@ -448,13 +529,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function setScanStatus(label, isLive = false) {
-    detectStatusText.textContent = label;
+    if (detectStatusText) detectStatusText.textContent = label;
+    if (!detectStatusBadge) return;
     if (isLive) {
-      detectStatusBadge.style.borderColor = "rgba(0, 245, 212, 0.4)";
-      detectStatusBadge.style.background = "rgba(0, 245, 212, 0.08)";
+      detectStatusBadge.style.borderColor = "rgba(56, 189, 248, 0.35)";
+      detectStatusBadge.style.background = "var(--accent-cyan-dim)";
+      detectStatusBadge.style.color = "var(--accent-cyan)";
     } else {
-      detectStatusBadge.style.borderColor = "rgba(255, 255, 255, 0.1)";
-      detectStatusBadge.style.background = "rgba(30, 41, 59, 0.40)";
+      detectStatusBadge.style.borderColor = "var(--border-outer)";
+      detectStatusBadge.style.background = "rgba(15, 23, 42, 0.4)";
+      detectStatusBadge.style.color = "var(--text-secondary)";
     }
   }
 
@@ -462,9 +546,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const pName = data.name || data.fullName || "";
     if (pName) {
       leadNameInput.value = pName;
-      setScanStatus("Profile Detected", true);
+      setScanStatus("LinkedIn Detected", true);
     } else if (isLiveDetection) {
-      setScanStatus(currentProfileUrl.includes("linkedin.com") ? "LinkedIn Page" : "Ready (Manual Entry)", false);
+      setScanStatus(currentProfileUrl.includes("linkedin.com") ? "LinkedIn Page" : "Manual Entry", false);
     }
 
     // Render Job Title / Profile Headline right below the Full Name
@@ -596,13 +680,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 5. Pipeline Group Management & Dropdown Renderer
   function renderPipelineGroups() {
-    groupSelect.innerHTML = '<option value="">-- Select a Pipeline Group --</option>';
+    groupSelect.innerHTML = '<option value="">Select target pipeline...</option>';
     pipelineGroups.forEach((groupName, idx) => {
       const option = document.createElement("option");
       option.value = groupName;
 
       if (!isProUser && idx > 0) {
-        option.textContent = `🔒 ${groupName} [PRO]`;
+        option.textContent = `🔒 ${groupName} (Pro)`;
         option.dataset.pro = "true";
       } else {
         option.textContent = idx === 0 ? `${groupName} (Default)` : groupName;
@@ -626,23 +710,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (manageGroupsBtn) {
     manageGroupsBtn.addEventListener("click", () => {
-      chrome.runtime.openOptionsPage();
+      openSettingsPage();
     });
   }
 
   // 6. Active Attached Tags Management (with instant remove & in-popup add)
   function renderActiveTags() {
+    if (!activeTagsBox) return;
     activeTagsBox.innerHTML = "";
-    const tagsArr = Array.from(activeTags);
+    const tagsArr = Array.from(activeTags).map(cleanTag).filter(Boolean);
     if (activeCountLabel) activeCountLabel.textContent = tagsArr.length.toString();
 
     if (tagsArr.length === 0) {
-      activeTagsBox.innerHTML = '<span class="empty-tags-hint">No tags attached. Select quick tags below!</span>';
+      activeTagsBox.innerHTML = '<span class="empty-tags-hint">No tags applied — select presets below</span>';
     } else {
       tagsArr.forEach((tag) => {
         const pill = document.createElement("span");
         pill.className = "active-tag-pill";
-        pill.textContent = tag;
+
+        const dotColor = TAG_COLORS[tag.toLowerCase()] || "var(--accent-cyan)";
+        const dot = document.createElement("span");
+        dot.className = "tag-dot";
+        dot.style.backgroundColor = dotColor;
+
+        const textSpan = document.createElement("span");
+        textSpan.textContent = tag;
 
         const removeBtn = document.createElement("span");
         removeBtn.className = "active-tag-remove";
@@ -651,11 +743,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         removeBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           activeTags.delete(tag);
+          // Also clear raw variant if present
+          for (const t of Array.from(activeTags)) {
+            if (cleanTag(t) === tag) activeTags.delete(t);
+          }
           renderActiveTags();
           updateQuickTagButtons();
-          inlineTagLimitBanner.classList.remove("visible");
+          if (inlineTagLimitBanner) inlineTagLimitBanner.classList.remove("visible");
         });
 
+        pill.appendChild(dot);
+        pill.appendChild(textSpan);
         pill.appendChild(removeBtn);
         activeTagsBox.appendChild(pill);
       });
@@ -664,12 +762,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateTagCounterLabel();
   }
 
-  const handleAddCustomActiveTag = async () => {
-    const text = customActiveTagInput.value.trim();
+  const handleAddCustomActiveTag = async (e) => {
+    if (e) e.preventDefault();
+    if (!customActiveTagInput) return;
+    const rawText = customActiveTagInput.value.trim();
+    const text = cleanTag(rawText);
     if (!text) return;
 
     if (!isProUser && activeTags.size >= 2 && !activeTags.has(text)) {
-      inlineTagLimitBanner.classList.add("visible");
+      if (inlineTagLimitBanner) inlineTagLimitBanner.classList.add("visible");
       return;
     }
 
@@ -679,41 +780,78 @@ document.addEventListener("DOMContentLoaded", async () => {
       await chrome.storage.local.set({ quick_tags: quickTags, tagsilo_tags: quickTags });
       try {
         await chrome.storage.sync.set({ quick_tags: quickTags, tagsilo_tags: quickTags });
-      } catch (e) {}
+      } catch (err) {}
       renderQuickTags();
     }
 
     customActiveTagInput.value = "";
     renderActiveTags();
     updateQuickTagButtons();
+    if (inlineTagLimitBanner) inlineTagLimitBanner.classList.remove("visible");
   };
 
-  addActiveTagBtn.addEventListener("click", handleAddCustomActiveTag);
-  customActiveTagInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") handleAddCustomActiveTag();
-  });
+  if (addActiveTagBtn) {
+    addActiveTagBtn.addEventListener("click", handleAddCustomActiveTag);
+  }
+  if (customActiveTagInput) {
+    customActiveTagInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleAddCustomActiveTag(e);
+      }
+    });
+  }
 
-  // 7. Quick Add Tags Grid (Button pills that toggle on/off)
+  // 7. Quick Add Tags Grid (Button pills with clean dot accents)
   function renderQuickTags() {
+    if (!quickTagsGrid) return;
     quickTagsGrid.innerHTML = "";
-    quickTags.forEach((tag) => {
-      const btn = document.createElement("button");
-      btn.className = "quick-tag-btn" + (activeTags.has(tag) ? " active" : "");
-      btn.textContent = tag;
+    if (!quickTags || quickTags.length === 0) {
+      quickTags = [
+        "High Priority",
+        "Executive",
+        "Warm Intro",
+        "Founder",
+        "Technical",
+        "Decision Maker"
+      ];
+    }
 
-      btn.addEventListener("click", () => {
-        if (activeTags.has(tag)) {
+    quickTags.forEach((rawTag) => {
+      const tag = cleanTag(rawTag);
+      if (!tag) return;
+      const isSelected = activeTags.has(tag) || activeTags.has(rawTag);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quick-tag-btn" + (isSelected ? " active" : "");
+      btn.dataset.tag = tag;
+
+      const dotColor = TAG_COLORS[tag.toLowerCase()] || "var(--accent-cyan)";
+      const dot = document.createElement("span");
+      dot.className = "tag-dot";
+      dot.style.backgroundColor = dotColor;
+
+      const textSpan = document.createElement("span");
+      textSpan.textContent = tag;
+
+      btn.appendChild(dot);
+      btn.appendChild(textSpan);
+
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (activeTags.has(tag) || activeTags.has(rawTag)) {
           activeTags.delete(tag);
+          activeTags.delete(rawTag);
           btn.classList.remove("active");
-          inlineTagLimitBanner.classList.remove("visible");
+          if (inlineTagLimitBanner) inlineTagLimitBanner.classList.remove("visible");
         } else {
           if (!isProUser && activeTags.size >= 2) {
-            inlineTagLimitBanner.classList.add("visible");
+            if (inlineTagLimitBanner) inlineTagLimitBanner.classList.add("visible");
             return;
           }
           activeTags.add(tag);
           btn.classList.add("active");
-          inlineTagLimitBanner.classList.remove("visible");
+          if (inlineTagLimitBanner) inlineTagLimitBanner.classList.remove("visible");
         }
         renderActiveTags();
       });
@@ -727,7 +865,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   function updateQuickTagButtons() {
     const buttons = quickTagsGrid.querySelectorAll(".quick-tag-btn");
     buttons.forEach((btn) => {
-      if (activeTags.has(btn.textContent)) {
+      const tag = btn.dataset.tag || cleanTag(btn.textContent);
+      if (activeTags.has(tag)) {
         btn.classList.add("active");
       } else {
         btn.classList.remove("active");
@@ -738,17 +877,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   function updateTagCounterLabel() {
     const count = activeTags.size;
     if (isProUser) {
-      tagLimitCounter.textContent = `${count} Selected (Pro Unlimited)`;
-      tagLimitCounter.style.color = "var(--neon-teal)";
+      tagLimitCounter.textContent = `${count} Applied`;
+      tagLimitCounter.style.color = "var(--accent-lime)";
     } else {
-      tagLimitCounter.textContent = `${count}/2 Selected`;
-      tagLimitCounter.style.color = count >= 2 ? "#fbbf24" : "var(--text-muted)";
+      tagLimitCounter.textContent = `${count} of 2 Applied`;
+      tagLimitCounter.style.color = count >= 2 ? "#fbbf24" : "var(--text-secondary)";
     }
   }
 
   if (manageTagsBtn) {
     manageTagsBtn.addEventListener("click", () => {
-      chrome.runtime.openOptionsPage();
+      openSettingsPage();
     });
   }
 
@@ -757,8 +896,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const { active_google_sheet_id } = await chrome.storage.local.get("active_google_sheet_id");
     if (active_google_sheet_id && sheetShortcutLink) {
       sheetShortcutLink.href = `https://docs.google.com/spreadsheets/d/${active_google_sheet_id}/edit`;
-      sheetShortcutLink.textContent = "View Your TagSilo Google Sheet";
-      sheetShortcutLink.style.display = "block";
+      sheetShortcutLink.textContent = "Open Pipeline Sheet ↗";
+      sheetShortcutLink.style.display = "inline-block";
     }
   }
 
@@ -779,8 +918,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         headerTierBadge.textContent = "PRO";
         headerTierBadge.className = "tier-badge pro";
         dailyCapIcon.textContent = "👑";
-        dailyCapText.textContent = "UNLIMITED SAVES";
-        dailyCapPill.className = "daily-cap-pill pro-pill";
+        dailyCapText.textContent = "Unlimited Sync";
+        dailyCapPill.className = "quota-pill pro-pill";
         if (inlineTagLimitBanner) {
           inlineTagLimitBanner.classList.remove("visible");
           inlineTagLimitBanner.style.display = "none";
@@ -802,8 +941,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           headerTierBadge.textContent = "PRO";
           headerTierBadge.className = "tier-badge pro";
           dailyCapIcon.textContent = "👑";
-          dailyCapText.textContent = "UNLIMITED SAVES";
-          dailyCapPill.className = "daily-cap-pill pro-pill";
+          dailyCapText.textContent = "Unlimited Sync";
+          dailyCapPill.className = "quota-pill pro-pill";
           if (inlineTagLimitBanner) {
             inlineTagLimitBanner.classList.remove("visible");
             inlineTagLimitBanner.style.display = "none";
@@ -815,11 +954,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           dailyCapText.textContent = `${dailyCount}/3 Saves`;
 
           if (dailyCount >= 3) {
-            dailyCapPill.className = "daily-cap-pill capped";
+            dailyCapPill.className = "quota-pill capped";
           } else if (dailyCount === 2) {
-            dailyCapPill.className = "daily-cap-pill near-limit";
+            dailyCapPill.className = "quota-pill near-limit";
           } else {
-            dailyCapPill.className = "daily-cap-pill";
+            dailyCapPill.className = "quota-pill";
           }
         }
         updateTagCounterLabel();
@@ -841,14 +980,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Cross-Browser Google Authorization (Native getAuthToken with tokeninfo scope verification & launchWebAuthFlow fallback)
+  // Cross-Browser Google Authorization (Native 1-Click with Direct Google OAuth Fallback)
   async function authenticateWithGoogle(interactive = true) {
-    const scopeStr = "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
-
-    // 1. Try Native Chrome Extension Identity API
+    // 1. Try Native Chrome Extension Identity API (Google Chrome 1-Click)
     try {
       const nativeToken = await new Promise((resolve, reject) => {
-        chrome.identity.getAuthToken({ interactive: interactive, scopes: scopeStr.split(" ") }, (tok) => {
+        chrome.identity.getAuthToken({ interactive: interactive }, (tok) => {
           if (chrome.runtime.lastError) {
             return reject(new Error(chrome.runtime.lastError.message));
           }
@@ -860,76 +997,79 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       if (nativeToken) {
-        // Verify token scopes via Google's tokeninfo endpoint
-        const tokenInfoRes = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${encodeURIComponent(nativeToken)}`);
-        if (tokenInfoRes.ok) {
-          const tokenInfo = await tokenInfoRes.json();
-          const grantedScopes = tokenInfo.scope || "";
-          const hasSheetsScope = grantedScopes.includes("spreadsheets") || grantedScopes.includes("drive");
-
-          if (hasSheetsScope) {
-            const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-              headers: { Authorization: `Bearer ${nativeToken}` }
-            });
-            const userProfile = userRes.ok ? await userRes.json() : null;
-            const googleUser = {
-              email: userProfile?.email || tokenInfo.email || "Google Account Connected",
-              name: userProfile?.name || "",
-              picture: userProfile?.picture || "",
-              lastAuth: new Date().toISOString()
-            };
-
-            currentAuthToken = nativeToken;
-            currentGoogleUser = googleUser;
-
-            await chrome.storage.local.set({
-              tagsilo_google_access_token: nativeToken,
-              tagsilo_google_user: googleUser
-            });
-
-            // Auto-Ingest / Sync user lead into Supabase database (Free or Pro)
-            syncUserToBackend(googleUser);
-
-            return { token: nativeToken, user: googleUser };
-          } else {
-            console.warn("[TagSilo Pro] Native token lacks spreadsheets scope. Purging cached token...");
-            await new Promise((r) => chrome.identity.removeCachedAuthToken({ token: nativeToken }, r));
+        let userProfile = null;
+        try {
+          const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: { Authorization: `Bearer ${nativeToken}` }
+          });
+          if (userRes.ok) {
+            userProfile = await userRes.json();
           }
-        } else {
-          // Token expired or invalid, purge
-          await new Promise((r) => chrome.identity.removeCachedAuthToken({ token: nativeToken }, r));
-        }
+        } catch (e) {}
+
+        const { tagsilo_google_user } = await chrome.storage.local.get("tagsilo_google_user");
+        const googleUser = {
+          email: userProfile?.email || tagsilo_google_user?.email || "Google Account Connected",
+          name: userProfile?.name || tagsilo_google_user?.name || "",
+          picture: userProfile?.picture || tagsilo_google_user?.picture || "",
+          lastAuth: new Date().toISOString()
+        };
+
+        currentAuthToken = nativeToken;
+        currentGoogleUser = googleUser;
+
+        await chrome.storage.local.set({
+          tagsilo_google_access_token: nativeToken,
+          tagsilo_google_user: googleUser
+        });
+
+        // Auto-Ingest / Sync user lead into Supabase database (Free or Pro)
+        syncUserToBackend(googleUser);
+
+        return { token: nativeToken, user: googleUser };
       }
     } catch (nativeErr) {
-      console.warn("[TagSilo Pro] Native getAuthToken note:", nativeErr.message);
+      if (!interactive) {
+        throw nativeErr;
+      }
     }
 
-    // 2. Fallback to launchWebAuthFlow with registered /google redirect URL
-    const redirectUrl = "https://" + chrome.runtime.id + ".chromiumapp.org/google";
-    const clientId = chrome.runtime.getManifest().oauth2?.client_id || "1087305619025-un37jr32jn77k6ah4rjc0rlgqekbranf.apps.googleusercontent.com";
-    const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${encodeURIComponent(clientId)}&response_type=token&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent(scopeStr)}`;
+    // 2. Direct Google OAuth 2.0 Flow via launchWebAuthFlow
+    if (interactive) {
+      const redirectUrl = "https://" + chrome.runtime.id + ".chromiumapp.org/google";
+      const manifestClientId = chrome.runtime.getManifest().oauth2?.client_id || "1087305619025-un37jr32jn77k6ah4rjc0rlgqekbranf.apps.googleusercontent.com";
+      const { custom_google_client_id } = await chrome.storage.local.get("custom_google_client_id");
+      const clientId = custom_google_client_id || manifestClientId;
 
-    return new Promise((resolve, reject) => {
-      chrome.identity.launchWebAuthFlow(
-        {
-          url: authUrl,
-          interactive: interactive
-        },
-        (responseUrl) => {
-          if (chrome.runtime.lastError || !responseUrl) {
-            return reject(new Error(chrome.runtime.lastError?.message || "Authentication flow was cancelled or closed."));
-          }
+      const scopes = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile"
+      ].join(" ");
 
-          try {
-            const urlObj = new URL(responseUrl);
-            const hashParams = new URLSearchParams(urlObj.hash.substring(1));
-            const accessToken = hashParams.get("access_token") || new URLSearchParams(urlObj.search).get("access_token");
+      const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${encodeURIComponent(clientId)}&response_type=token&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent(scopes)}`;
 
-            if (!accessToken) {
-              return reject(new Error("No access token parameter found in OAuth redirect callback."));
+      return new Promise((resolve, reject) => {
+        chrome.identity.launchWebAuthFlow(
+          {
+            url: authUrl,
+            interactive: true
+          },
+          async (responseUrl) => {
+            if (chrome.runtime.lastError || !responseUrl) {
+              return reject(new Error(chrome.runtime.lastError?.message || "Google authentication was cancelled or closed."));
             }
 
-            (async () => {
+            try {
+              const urlObj = new URL(responseUrl);
+              const hashParams = new URLSearchParams(urlObj.hash.substring(1));
+              const accessToken = hashParams.get("access_token") || new URLSearchParams(urlObj.search).get("access_token");
+
+              if (!accessToken) {
+                return reject(new Error("No access token parameter found in OAuth redirect callback."));
+              }
+
               let userProfile = null;
               try {
                 const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
@@ -957,20 +1097,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                 tagsilo_google_user: googleUser
               });
 
-              // Auto-Ingest / Sync user lead into Supabase database (Free or Pro)
               syncUserToBackend(googleUser);
 
               resolve({
                 token: accessToken,
                 user: googleUser
               });
-            })();
-          } catch (parseErr) {
-            reject(new Error("Failed to parse token from OAuth callback: " + parseErr.message));
+            } catch (parseErr) {
+              reject(new Error("Failed to parse token from OAuth callback: " + parseErr.message));
+            }
           }
-        }
-      );
-    });
+        );
+      });
+    }
+
+    throw new Error("Google authentication could not complete.");
   }
 
   // 1.1 Auto-Sync / Register user lead into Supabase PostgreSQL (Free or Pro)
@@ -993,19 +1134,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // Robust Persistent Auth Check (No unwanted sign-outs!)
   async function checkGoogleAuthState() {
     const { tagsilo_google_access_token, tagsilo_google_user } = await chrome.storage.local.get([
       "tagsilo_google_access_token",
       "tagsilo_google_user"
     ]);
 
-    // 1. Immediately rehydrate from stored user profile if previously connected
+    // 1. If stored user profile exists, IMMEDIATELY render them as authenticated (persistent session)
     if (tagsilo_google_user && tagsilo_google_user.email) {
       renderAuthenticatedUser(tagsilo_google_user, tagsilo_google_access_token || null);
-      syncUserToBackend(tagsilo_google_user);
     }
 
-    // 2. Validate / refresh token in background
+    // 2. Silently validate or refresh token in background
     if (tagsilo_google_access_token) {
       try {
         const checkRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
@@ -1024,7 +1165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           renderAuthenticatedUser(currentGoogleUser, currentAuthToken);
           return;
         } else {
-          // Token expired, remove cached token from identity manager
+          // Token expired, remove old cached token from Chrome Identity cache
           try {
             await new Promise((r) => chrome.identity.removeCachedAuthToken({ token: tagsilo_google_access_token }, r));
           } catch (e) {}
@@ -1034,7 +1175,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // 3. Try silent refresh to get a fresh access token without prompting
+    // 3. Try silent refresh to get a fresh access token without prompting user
     try {
       const silentAuth = await authenticateWithGoogle(false);
       if (silentAuth && silentAuth.token) {
@@ -1043,7 +1184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (silentErr) {}
 
-    // 4. If user was already signed in, maintain logged-in state (token will auto-refresh on save)
+    // 4. If user was previously signed in, PRESERVE their authenticated state (token will refresh on sync)
     if (tagsilo_google_user && tagsilo_google_user.email) {
       renderAuthenticatedUser(tagsilo_google_user, null);
       return;
@@ -1098,6 +1239,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   disconnectGoogleBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
     if (confirm("Disconnect Google Account from TagSilo Pro?")) {
+      if (currentAuthToken) {
+        try {
+          await new Promise((r) => chrome.identity.removeCachedAuthToken({ token: currentAuthToken }, r));
+        } catch (e) {}
+      }
       await chrome.storage.local.remove(["tagsilo_google_access_token", "tagsilo_google_user"]);
       renderUnauthenticatedUser();
     }
@@ -1110,37 +1256,58 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // 8. Central Synchronization Execution
-  primarySyncBtn.addEventListener("click", async () => {
-    // 1. Freemium Squeeze Rule: 3 saves per 24 hours
-    if (!isProUser && dailyCount >= maxDaily) {
-      showPaywallModal("You've reached your 3 free saves today. Upgrade to Pro for instant unlimited saves for $9.99/mth");
-      return;
-    }
-
-    // 2. Lead Name Validation
-    const leadName = leadNameInput.value.trim();
-    if (!leadName) {
-      leadNameInput.focus();
-      leadNameInput.style.borderBottomColor = "var(--neon-magenta)";
-      setTimeout(() => {
-        leadNameInput.style.borderBottomColor = "";
-      }, 2000);
-      return;
-    }
-
-    // 3. Ensure Google Auth Token is active
-    if (!currentAuthToken) {
-      try {
-        const authRes = await authenticateWithGoogle(true);
-        currentAuthToken = authRes.token;
-        renderAuthenticatedUser(authRes.user, authRes.token);
-      } catch (e) {
-        alert("Google Authentication is required to synchronize pipelines directly to your spreadsheet: " + e.message);
+  if (primarySyncBtn) {
+    primarySyncBtn.addEventListener("click", async () => {
+      // 1. Freemium Squeeze Rule: 3 saves per 24 hours
+      if (!isProUser && dailyCount >= maxDaily) {
+        showPaywallModal("You have reached your 3 daily profile saves on TagSilo Free. Upgrade to Pro for unlimited exports and custom workflows.");
         return;
       }
-    }
 
-    setSyncLoadingState(true);
+      // 2. Ensure Google Auth Token is active FIRST (prompt user to connect if unauthenticated)
+      if (!currentAuthToken || !currentGoogleUser) {
+        let silentAuthSuccess = false;
+        try {
+          const silent = await authenticateWithGoogle(false);
+          if (silent && silent.token) {
+            currentAuthToken = silent.token;
+            renderAuthenticatedUser(silent.user, silent.token);
+            silentAuthSuccess = true;
+          }
+        } catch (e) {}
+
+        if (!silentAuthSuccess) {
+          const confirmSignIn = confirm("Google Workspace is not connected.\n\nConnect your Google account now to synchronize leads directly to your Google Sheets spreadsheet?");
+          if (!confirmSignIn) {
+            return;
+          }
+          try {
+            const authRes = await authenticateWithGoogle(true);
+            currentAuthToken = authRes.token;
+            renderAuthenticatedUser(authRes.user, authRes.token);
+            await queryUserProfileStatus();
+          } catch (authErr) {
+            alert("Google Sign-In failed or was cancelled: " + authErr.message);
+            return;
+          }
+        }
+      }
+
+      // 3. Lead Name Validation
+      const leadName = leadNameInput ? leadNameInput.value.trim() : "";
+      if (!leadName) {
+        if (leadNameInput) {
+          leadNameInput.focus();
+          leadNameInput.style.borderBottomColor = "var(--danger)";
+          setTimeout(() => {
+            leadNameInput.style.borderBottomColor = "";
+          }, 2000);
+        }
+        alert("Please enter a Lead Full Name to synchronize this profile to your spreadsheet.");
+        return;
+      }
+
+      setSyncLoadingState(true);
 
     try {
       const stored = await chrome.storage.local.get(["creem_license_key"]);
@@ -1149,6 +1316,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         rawManualEmail = "";
       }
       const finalEmail = rawManualEmail || (currentExtractedEmail && currentExtractedEmail !== "Unavailable" && currentExtractedEmail !== "Searching..." ? currentExtractedEmail : "Cannot Find");
+
+      // Clean active tags for spreadsheet sync
+      const cleanedTags = Array.from(activeTags).map(cleanTag).filter(Boolean);
 
       // 8-Field Data Payload matching exact Google Sheets sequence:
       // Column A: Saved Date | Column B: Full Name | Column C: Job Title | Column D: LinkedIn URL
@@ -1160,7 +1330,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         profileUrl: currentProfileUrl,
         email: finalEmail,
         group: groupSelect.value || "Prospects",
-        tags: Array.from(activeTags),
+        tags: cleanedTags,
         notes: leadNotesInput.value.trim(),
         userEmail: currentGoogleUser?.email || ""
       };
@@ -1173,7 +1343,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         creemLicenseKey: stored.creem_license_key || ""
       });
 
-      // 5. If Token Expired or Invalid, Auto-Refresh Google Token and Retry
+      // 5. If Token Expired or Invalid, Auto-Refresh Google Token Silently and Retry
       const isAuthError = response && !response.success && response.error && (
         response.error.toLowerCase().includes("authentication credential") ||
         response.error.toLowerCase().includes("oauth") ||
@@ -1183,18 +1353,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
       if (isAuthError) {
-        console.warn("[TagSilo Pro] Expired Google OAuth token detected. Refreshing token...");
+        console.warn("[TagSilo Pro] Expired Google OAuth token detected. Refreshing token silently...");
         try {
-          const refreshed = await authenticateWithGoogle(true);
-          currentAuthToken = refreshed.token;
-          renderAuthenticatedUser(refreshed.user, refreshed.token);
+          if (currentAuthToken) {
+            await new Promise((r) => chrome.identity.removeCachedAuthToken({ token: currentAuthToken }, r));
+          }
+          let refreshed = null;
+          try {
+            refreshed = await authenticateWithGoogle(false);
+          } catch (e) {
+            refreshed = await authenticateWithGoogle(true);
+          }
 
-          response = await chrome.runtime.sendMessage({
-            action: "EXECUTE_SYNC",
-            profileData: profileData,
-            googleAuthToken: refreshed.token,
-            creemLicenseKey: stored.creem_license_key || ""
-          });
+          if (refreshed && refreshed.token) {
+            currentAuthToken = refreshed.token;
+            renderAuthenticatedUser(refreshed.user, refreshed.token);
+
+            response = await chrome.runtime.sendMessage({
+              action: "EXECUTE_SYNC",
+              profileData: profileData,
+              googleAuthToken: refreshed.token,
+              creemLicenseKey: stored.creem_license_key || ""
+            });
+          }
         } catch (reAuthErr) {
           console.error("[TagSilo Pro] Re-auth retry error:", reAuthErr);
         }
@@ -1234,6 +1415,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       setSyncLoadingState(false);
     }
   });
+}
 
   function setSyncLoadingState(isLoading) {
     primarySyncBtn.disabled = isLoading;
@@ -1340,14 +1522,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  enterLicenseLink.addEventListener("click", () => {
-    hidePaywallModal();
-    chrome.runtime.openOptionsPage();
-  });
-
-  openOptionsBtn.addEventListener("click", () => {
-    chrome.runtime.openOptionsPage();
-  });
+  if (enterLicenseLink) {
+    enterLicenseLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      hidePaywallModal();
+      openSettingsPage();
+    });
+  }
 });
 
 /**

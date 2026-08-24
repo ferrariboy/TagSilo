@@ -70,53 +70,22 @@ body {
 
 .header-brand {
   display: flex;
-  align-items: center;
-  gap: 18px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
-.brand-badge-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: rgba(0, 245, 212, 0.12);
-  border: 1px solid rgba(0, 245, 212, 0.30);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 20px rgba(0, 245, 212, 0.20);
-  flex-shrink: 0;
-}
-
-.header-brand-line {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-title {
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: #FFFFFF;
-}
-
-.header-tagline {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: var(--neon-teal);
-  background: rgba(0, 245, 212, 0.12);
-  padding: 3px 8px;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 245, 212, 0.25);
+.options-brand-wordmark {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
 }
 
 .header-subtitle {
   font-size: 14px;
   color: var(--text-muted);
-  margin-top: 4px;
-  max-width: 540px;
+  max-width: 520px;
+  line-height: 1.45;
 }
 
 .tier-badge {
