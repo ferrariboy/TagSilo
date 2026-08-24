@@ -1,21 +1,19 @@
 {
   "version": 2,
   "name": "tagsilo-pro-api",
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
     }
-  ],
-  "routes": [
+  },
+  "headers": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, DELETE",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, x-api-key, x-creem-signature"
-      }
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS, PUT, DELETE" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, x-api-key, x-creem-signature" }
+      ]
     }
   ]
 }
