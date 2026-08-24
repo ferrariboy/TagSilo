@@ -1,0 +1,13 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 115" role="img" aria-label="TagSilo logo matched height">
+  <!-- Official TagSilo Precision 'T' Symbol (Y: 10 to 90, Total Height = 80px) -->
+  <g transform="translate(10, 10)">
+    <path d="M 6 32 C 6 11 20 2 40 2 C 60 2 74 11 74 32 Z" fill="#A6FF26"/>
+    <path d="M 25 32 L 55 32 L 55 67 L 41 81 L 25 81 Z" fill="#A6FF26"/>
+    <circle cx="40" cy="51" r="6.5" fill="#06080D"/>
+    <polygon points="55,67 55,81 41,81" fill="#06080D" opacity="0.9"/>
+  </g>
+  <!-- Wordmark Text (Y: 82 with full room down to Y: 110 for 'g' descender) -->
+  <text x="106" y="82" font-family="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif" font-size="80" font-weight="800" letter-spacing="-2px">
+    <tspan fill="#F8FAFC">Tag</tspan><tspan fill="#A6FF26">Silo</tspan>
+  </text>
+</svg>

@@ -1,0 +1,196 @@
+================================================================================
+TAGSILO PRO: 5-DAY GTM LAUNCH MASTER BLUEPRINT & EXECUTION GUIDE
+================================================================================
+
+--------------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY & SWARM STRATEGIC CONSENSUS
+--------------------------------------------------------------------------------
+- Target ICP: Outbound SDRs, B2B Agency Founders, Freelance Recruiters, and Growth Marketers who prospect on LinkedIn daily.
+- Value Proposition: The 1-Click LinkedIn-to-Google Sheets pipeline that feels like a native browser feature. No context switching, zero manual copy-pasting, and zero CRM bloat.
+- Pricing & Monetization:
+  * Free Tier: 3 lead syncs/day, max 2 tags, 1 default pipeline group.
+  * Pro Tier: $9.99/month (or $79/year) with unlimited daily syncs, unlimited tags, custom taxonomies, and multi-pipeline routing.
+
+REVERSE-ENGINEERED SUCCESS FACTORS FROM TOP BROWSER EXTENSIONS:
+- Loom: Time-to-value < 10 seconds. Instant detection and immediate sync feedback.
+- Hunter.io: Contextual in-page parsing. Auto-highlights contact email and profile details.
+- Magical: Direct spreadsheet autopilot with zero manual data entry.
+- Taplio / Folk: Visual tag silos and pipeline categorization right inside the browser.
+
+
+--------------------------------------------------------------------------------
+2. THE 5-DAY GTM LAUNCH TIMELINE
+--------------------------------------------------------------------------------
+
+[DAY 1: Technical Hardening, OAuth Verification & CWS Submission]
+1. Manifest & Permissions Audit:
+   - Verify manifest_version 3 compliance.
+   - Restrict host_permissions specifically to LinkedIn URLs and API endpoints.
+   - Confirm all icon assets exist (16x16, 48x48, 128x128).
+2. Google OAuth Verification:
+   - Configure Google Cloud Console OAuth consent screen with App Name, Logo, Support Email, and Privacy Policy URL.
+   - Verify required scopes: spreadsheets, drive.file, userinfo.email.
+3. Chrome Web Store (CWS) Submission:
+   - Upload production .zip package to Chrome Developer Dashboard.
+   - Complete store metadata, localized descriptions, and permissions justifications.
+   - Note: CWS review takes 24 to 48 hours; submitting on Day 1 ensures approval by Day 4/5.
+4. Payment & License Gateway Validation:
+   - Run end-to-end sandbox tests on Creem checkout, webhook triggers, and in-extension license key validation.
+
+[DAY 2: High-Converting Landing Page & Legal Readiness]
+1. Deploy Conversion Landing Page:
+   - Hero section with clear value proposition and primary CTA: "Add to Chrome — It's Free".
+   - High-contrast animated demo showing LinkedIn profile -> Tagging -> Google Sheet row generated.
+   - Transparent Free vs Pro ($9.99/mo) pricing table.
+   - FAQ section answering LinkedIn safety, Google Sheets security, and duplicate prevention.
+2. Compliance & Trust Pages:
+   - Publish live Privacy Policy and Terms of Service (mandatory for Google OAuth and CWS).
+   - Explicitly declare that user lead data is never sold or shared with third parties.
+3. Analytics & Attribution:
+   - Install PostHog / GA4 with event tracking for CTA clicks and install redirects.
+   - Prepare campaign UTM parameters for Product Hunt, LinkedIn, and X.
+
+[DAY 3: Seed User Cohort & The 5-Star Review Moat]
+1. Private Beta Launch (15-20 Power Users):
+   - Onboard a trusted group of agency owners, SDRs, and founder peers.
+   - Guide them through capturing 3 sample profiles into their own Google Sheets.
+2. Review Velocity Sprint:
+   - Secure 15+ authentic 5-star ratings and written reviews on the Chrome Web Store listing.
+   - Reviews should highlight speed, seamless Google Sheets sync, and time saved.
+3. KOL & Influencer Seeding:
+   - Direct message 10 micro-influencers (1k-15k followers) in #SalesOps, #ColdEmail, and #LeadGen.
+   - Provide complimentary Lifetime Pro licenses in exchange for test feedback and launch-day shoutouts.
+
+[DAY 4: Product Hunt, Video Demo & Distribution Staging]
+1. Product Hunt Staging:
+   - Title: TagSilo Pro — Turn LinkedIn into an automated Google Sheets CRM pipeline.
+   - Upload 1270x760px animated teaser GIF and 5 high-resolution feature slides.
+   - Prepare the Maker first comment including the origin story and a 20% launch discount code.
+2. 60-Second Video Demo Recording:
+   - 0:00-0:10: The Pain (Manual tab-switching and copy-pasting lead details).
+   - 0:10-0:30: The Magic (Opening TagSilo on LinkedIn, clicking 2 tags, hitting Sync).
+   - 0:30-0:45: The Result (Google Sheet instantly populated with clean data).
+   - 0:45-1:00: Call to Action (Install free on Chrome Web Store).
+3. Stage all social threads, community posts, and direct outreach swipe copy.
+
+[DAY 5: Public Blitz Day (Launch Zero Hour)]
+- 00:01 PST: Go live on Product Hunt. Trigger notification alerts to VIP seed supporters.
+- 06:00 PST: Publish LinkedIn Video Demo + Founder Story.
+- 07:00 PST: Publish X/Twitter "How I Built / Product Teardown" thread.
+- 08:30 PST: Share in target communities (Reddit r/sales, r/entrepreneur, Indie Hackers).
+- 10:00 PST: Direct outreach sprint to agency owners and SDR leads with personalized 30s demos.
+- 14:00 PST: Product Hunt mid-day push; reply to all comments within 5 minutes.
+- 18:00 PST: End-of-day recap, traffic stats, and thank-you announcement.
+
+
+--------------------------------------------------------------------------------
+3. WEBSITE PREPAREDNESS SPECIFICATION
+--------------------------------------------------------------------------------
+1. Announcement Banner: "⚡ TagSilo Pro is officially live on Chrome! Use code LAUNCH20 for 20% off."
+2. Hero Section:
+   - Headline: "Turn LinkedIn into Your Automated Outbound CRM in 1 Click."
+   - Subhead: "Extract names, verified emails, and headlines, assign pipeline tags, and auto-sync directly into your Google Sheets."
+   - CTA: "[ Add to Chrome — It's Free ]"
+   - Trust Badges: "No credit card required • Works on all LinkedIn profiles • Zero setup friction"
+3. Feature Deep-Dive:
+   - 1-Click Profile & Email Extraction
+   - Pipeline Grouping & Custom Tagging Badges
+   - Duplicate Lead Detection (never pitch the same person twice)
+   - Real-Time Google Sheets Cloud Sync
+4. Pricing Grid: Free ($0) vs Pro Monthly ($9.99/mo) vs Pro Annual ($79/yr).
+5. Footer: Privacy Policy, Terms of Service, Support Email, Chrome Store Direct Link.
+
+
+--------------------------------------------------------------------------------
+4. SOCIAL MEDIA SWIPE FILES & COPY
+--------------------------------------------------------------------------------
+
+[LINKEDIN LAUNCH POST]
+I spent months watching SDRs, agency founders, and recruiters do the exact same tedious task:
+
+1. Find a great prospect on LinkedIn
+2. Highlight name -> Ctrl+C -> Switch tab -> Ctrl+V
+3. Highlight title -> Ctrl+C -> Switch tab -> Ctrl+V
+4. Hunt for email... switch tabs again
+5. Repeat 100 times until your wrists hurt.
+
+It was slow, messy, and filled with duplicate data.
+
+So I built TagSilo Pro:
+⚡ 1-Click LinkedIn lead detection
+🏷️ Custom pipeline tagging & notes canvas
+📊 Direct, automated sync into your private Google Sheets
+
+No bloated $100/mo CRM setups. No context switching.
+
+It is officially LIVE on the Chrome Web Store today.
+Try it completely free (link in the first comment 👇)
+
+Drop a comment below and I'll send you a private code for 3 months of Pro free!
+
+
+[X / TWITTER LAUNCH THREAD]
+1/7 🚨 Introducing TagSilo Pro: The fastest way to turn LinkedIn browsing into an automated outbound pipeline.
+
+Zero context switching. Zero copy-pasting. 100% automated Google Sheets sync.
+
+Here is how it works 👇 🧵
+
+2/7 🛑 The Problem:
+Outbound prospecting is broken. You spend more time managing spreadsheets and tab-hopping than actually talking to prospects.
+
+3/7 ⚡ The Solution:
+Open TagSilo on any LinkedIn profile:
+- Auto-extracts Name, Headline, Profile URL, and Email
+- Add custom multi-tag qualification badges (e.g. 🎯 High Intent, Series A)
+- Add custom follow-up notes
+
+4/7 📊 1-Click Google Sheets Sync:
+Hit "Sync to Google Sheets" and TagSilo instantly writes the formatted row to your private spreadsheet. Duplicate detection prevents saving the same lead twice.
+
+5/7 💰 Simple, Transparent Pricing:
+- Free forever: 3 leads/day, default pipeline
+- Pro ($9.99/mo): Unlimited leads, unlimited tags, custom taxonomies
+
+6/7 🚀 We're live on Product Hunt and Chrome Web Store today!
+Get the extension here: [CWS_LINK]
+
+7/7 Retweet the first tweet and reply "SILO" and I'll DM you a 50% discount code for lifetime Pro! 🎉
+
+
+--------------------------------------------------------------------------------
+5. CHROME WEB STORE OPTIMIZATION (CWS SEO & METADATA)
+--------------------------------------------------------------------------------
+- Store Title: TagSilo Pro - LinkedIn Lead Tagger & Google Sheets Sync
+- Category: Productivity / Workflow & Planning
+- Short Summary (132 chars max):
+  Extract LinkedIn leads, assign pipeline tags, and auto-sync prospects directly into Google Sheets in one click.
+
+- Permission Justifications (For Store Review Submission):
+  * identity: "Required to authenticate the user with Google OAuth 2.0 to securely access and create rows in the user's private Google Sheet."
+  * storage: "Required to store user preferences, active tag taxonomies, and local pipeline configuration."
+  * activeTab / scripting: "Required to read public profile details (Name, Headline, Email) on the active LinkedIn profile tab upon user interaction."
+  * host_permissions (https://*.linkedin.com/*): "Required to inject the profile extraction content script only on LinkedIn profile pages."
+
+- Required Store Graphics:
+  * Icon Assets: 16x16, 48x48, 128x128 PNGs
+  * Screenshots (1280x800px):
+    1. In-page Profile Detection on LinkedIn
+    2. Multi-tag Badging & Pipeline Routing
+    3. Auto-populated Google Sheets Output
+    4. Options Console & Custom Taxonomy Builder
+  * Promo Tiles: 440x280px (Small Tile) and 1400x560px (Marquee Banner)
+
+
+--------------------------------------------------------------------------------
+6. CRITICAL RISK FACTORS & MITIGATION STRATEGIES
+--------------------------------------------------------------------------------
+1. Google OAuth Verification Screen:
+   - Submit for Google App Verification immediately so users don't see unverified app warnings.
+2. Google Sheets API Quota Management:
+   - Handle 429 rate limit responses gracefully with exponential backoff.
+3. LinkedIn Single Page App (SPA) Navigation:
+   - MutationObserver ensures profile cache resets cleanly when navigating between prospects.
+4. Frictionless Freemium Paywall:
+   - Prompt upgrade modal upon 4th daily capture with instant Creem checkout and real-time license activation.
+================================================================================

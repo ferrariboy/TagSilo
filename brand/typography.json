@@ -1,0 +1,15 @@
+{
+  "name": "TagSilo",
+  "heading": {
+    "family": "Plus Jakarta Sans",
+    "fallback": "Manrope, system-ui, sans-serif"
+  },
+  "body": {
+    "family": "Plus Jakarta Sans",
+    "fallback": "Manrope, system-ui, sans-serif"
+  },
+  "mono": {
+    "family": "JetBrains Mono",
+    "fallback": "ui-monospace, monospace"
+  }
+}

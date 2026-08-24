@@ -1,0 +1,30 @@
+{
+  "name": "TagSilo",
+  "primary": "#A6FF26",
+  "secondary": "#95EE18",
+  "accent": "#A6FF26",
+  "background": "#06080D",
+  "surface": "#0B0F19",
+  "card": "#0F172A",
+  "text": "#F8FAFC",
+  "textMuted": "#94A3B8",
+  "border": "rgba(255, 255, 255, 0.08)",
+  "accents": {
+    "lime": "#A6FF26",
+    "limeHover": "#95EE18",
+    "cyan": "#38BDF8",
+    "pink": "#FF0055",
+    "emerald": "#10B981"
+  },
+  "rules": {
+    "do": [
+      "Use Electric Neon Lime (#A6FF26) as primary focal point and CTA color",
+      "Pair with deep OLED black (#06080D) and obsidian surfaces (#0B0F19)",
+      "Keep geometry clean, high-contrast, and precision-aligned"
+    ],
+    "dont": [
+      "Do not use muted pastel greens in place of Neon Lime",
+      "Do not lower text contrast against dark backgrounds below WCAG AA standards"
+    ]
+  }
+}

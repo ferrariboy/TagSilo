@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TagSilo Pro V6 — Stop Letting Warm Leads Disappear in Tabs</title>
+  <meta name="description" content="Capture the profile. Tag the intent. Sync the sheet. The 1-click zero-setup LinkedIn organization layer and automated Google Sheets CRM across all major browsers.">
+  <link rel="icon" type="image/svg+xml" href="assets/tagsilo-favicon.svg">
+
+  <!-- Typography: Plus Jakarta Sans, Manrope & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN + TagSilo Neon Lime Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '"Manrope"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              lime: '#A6FF26',
+              limeHover: '#95EE18',
+              limeMuted: 'rgba(166, 255, 38, 0.15)',
+              oled: '#06080D',
+              surface: '#0B0F19',
+              card: '#0F172A',
+              cardBorder: 'rgba(255, 255, 255, 0.08)',
+              pink: '#FF0055',
+              emerald: '#10B981',
+              cyan: '#38BDF8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Flowbite CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+
+  <!-- Custom Styles & Neon Glow Engine -->
+  <style>
+    .text-gradient-lime {
+      background: linear-gradient(135deg, #A6FF26 0%, #D4FF00 40%, #FFFFFF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .glow-lime-mesh {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(140px);
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(166, 255, 38, 0.12) 0%, transparent 70%);
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .animate-marquee {
+      display: flex;
+      width: 200%;
+      animation: marquee 35s linear infinite;
+    }
+    .animate-marquee:hover {
+      animation-play-state: paused;
+    }
+    .marquee-mask {
+      mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    }
+    input[type=range] {
+      accent-color: #A6FF26;
+    }
+  </style>
+</head>
+<body class="bg-brand-oled text-slate-100 antialiased selection:bg-brand-lime selection:text-brand-oled min-h-screen flex flex-col font-sans">
+
+  <!-- Ambient Light Orbs -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
+    <div class="glow-lime-mesh w-[650px] h-[650px] -top-32 left-1/4"></div>
+    <div class="glow-lime-mesh w-[500px] h-[500px] top-1/2 -right-24 opacity-70"></div>
+    <div class="glow-lime-mesh w-[600px] h-[600px] -bottom-24 -left-20 opacity-50"></div>
+  </div>
+
+  <!-- 0. High-Visibility Attention Bar -->
+  <header class="relative z-40 bg-brand-lime/10 border-b border-brand-lime/20 text-slate-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between text-xs sm:text-sm">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-lime/20 text-brand-lime font-mono font-bold text-[10px] uppercase tracking-wider border border-brand-lime/30">
+          <span class="w-2 h-2 rounded-full bg-brand-lime animate-ping"></span>
+          LIVE ON ALL BROWSERS
+        </span>
+        <span class="hidden md:inline text-slate-300">Launch Special: Save 20% on TagSilo Pro with code <strong class="text-brand-lime font-mono font-bold">LAUNCH20</strong></span>
+      </div>
+      <a href="#pricing" class="text-brand-lime hover:underline font-bold flex items-center gap-1">
+        Claim 20% Off ➔
+      </a>
+    </div>
+  </header>
+
+  <!-- 1. Single-Line Fixed Glass Navbar with UInest Premium Button & Official Logo -->
+  <nav class="sticky top-0 z-50 bg-brand-surface/85 backdrop-blur-xl border-b border-white/10">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
+      
+      <!-- Official Matched-Height Dark Vector Logo Lockup -->
+      <a href="#" class="flex items-center shrink-0">
+        <img src="assets/tagsilo-wordmark-matched-dark.svg" alt="TagSilo Pro" class="h-8 w-auto object-contain">
+      </a>
+
+      <!-- Center Nav Links -->
+      <div class="hidden lg:flex items-center space-x-6 xl:space-x-8 text-xs xl:text-sm font-medium">
+        <a href="#how-it-works" class="text-slate-300 hover:text-brand-lime transition-colors">How It Works</a>
+        <a href="#problem" class="text-slate-300 hover:text-brand-lime transition-colors">The Problem</a>
+        <a href="#demo" class="text-slate-300 hover:text-brand-lime transition-colors">Live Demo</a>
+        <a href="#features" class="text-slate-300 hover:text-brand-lime transition-colors">Capabilities</a>
+        <a href="#proof" class="text-slate-300 hover:text-brand-lime transition-colors">Wall of Proof</a>
+        <a href="#pricing" class="text-slate-300 hover:text-brand-lime transition-colors">Pricing</a>
+        <a href="#faq" class="text-slate-300 hover:text-brand-lime transition-colors">FAQ</a>
+      </div>
+
+      <!-- Right Action CTA (UInest Premium Button Component) -->
+      <div class="flex items-center gap-3">
+        
+        <a href="https://chrome.google.com/webstore" target="_blank" class="relative inline-flex items-center justify-center p-0.5 overflow-hidden rounded-full group focus:outline-none focus:ring-4 focus:ring-brand-lime/30 shrink-0 cursor-pointer">
+          <!-- Animated Glow Ring -->
+          <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-brand-lime via-emerald-400 to-brand-lime group-hover:from-brand-lime group-hover:to-emerald-300 animate-pulse rounded-full opacity-80 group-hover:opacity-100 blur-[1px] transition-all"></span>
+          <!-- Glassmorphic Button Body -->
+          <span class="relative px-4 sm:px-5 py-2 sm:py-2.5 transition-all ease-in duration-150 bg-brand-oled/90 rounded-full group-hover:bg-brand-oled/70 flex items-center gap-2 border border-brand-lime/40 text-xs sm:text-sm font-extrabold text-brand-lime group-hover:text-white shadow-[0_0_20px_rgba(166,255,38,0.35)]">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-lime opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-lime"></span>
+            </span>
+            <span>⚡ Add to Browser — Free</span>
+            <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1 text-brand-lime group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </span>
+        </a>
+        
+        <!-- Mobile menu toggle button -->
+        <button data-collapse-toggle="navbar-sticky" type="button" class="inline-flex items-center p-2 w-9 h-9 justify-center text-sm text-slate-400 rounded-lg lg:hidden hover:bg-slate-800 focus:outline-none" aria-controls="navbar-sticky" aria-expanded="false">
+          <span class="sr-only">Open menu</span>
+          <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Menu Drawer -->
+    <div class="hidden lg:hidden w-full border-t border-white/10 bg-brand-surface px-4 py-4" id="navbar-sticky">
+      <ul class="flex flex-col space-y-3 font-medium text-sm">
+        <li><a href="#how-it-works" class="block py-1 text-slate-300 hover:text-brand-lime">How It Works</a></li>
+        <li><a href="#problem" class="block py-1 text-slate-300 hover:text-brand-lime">The Problem</a></li>
+        <li><a href="#demo" class="block py-1 text-slate-300 hover:text-brand-lime">Live Demo</a></li>
+        <li><a href="#features" class="block py-1 text-slate-300 hover:text-brand-lime">Capabilities</a></li>
+        <li><a href="#proof" class="block py-1 text-slate-300 hover:text-brand-lime">Wall of Proof</a></li>
+        <li><a href="#pricing" class="block py-1 text-slate-300 hover:text-brand-lime">Pricing</a></li>
+        <li><a href="#faq" class="block py-1 text-slate-300 hover:text-brand-lime">FAQ</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 2. Full-Screen Hero Viewport (100% Fits In Single Screen on Any Device) -->
+  <section class="relative z-10 min-h-[calc(100vh-95px)] flex flex-col justify-center overflow-hidden py-8 sm:py-12">
+    
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
+      
+      <!-- Monospace Eyebrow Badge -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-lime/10 border border-brand-lime/30 text-brand-lime text-xs font-mono font-bold uppercase tracking-widest mb-5 backdrop-blur-md">
+        <span class="w-2 h-2 rounded-full bg-brand-lime animate-pulse"></span>
+        01 // THE ZERO-SETUP LINKEDIN PIPELINE
+      </div>
+
+      <!-- Main Headline: Punchy & Direct -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-[1.12] mb-4 drop-shadow-xl">
+        Stop letting warm leads disappear <br class="hidden sm:inline">
+        into <span class="text-gradient-lime">tabs, threads, and bookmarks.</span>
+      </h1>
+
+      <!-- The 3-Beat Subhead -->
+      <p class="text-lg sm:text-2xl text-slate-100 max-w-3xl mx-auto font-extrabold leading-snug mb-3 drop-shadow">
+        Capture the profile. Tag the intent. Sync the sheet.
+      </p>
+      <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed mb-6">
+        TagSilo turns active LinkedIn prospecting into a clean, structured Google Sheets database in one click. No context switching, zero manual data entry, and no bloated $100/mo enterprise software.
+      </p>
+
+      <!-- Primary Action Row -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-6">
+        <a href="https://chrome.google.com/webstore" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 text-brand-oled bg-brand-lime hover:bg-brand-limeHover focus:ring-4 focus:ring-brand-lime/30 font-extrabold rounded-full text-sm sm:text-base px-8 py-3.5 text-center transition-all shadow-[0_0_35px_rgba(166,255,38,0.45)]">
+          <span>⚡ Get TagSilo Free — Add to Browser</span>
+          <span class="font-mono font-bold">➔</span>
+        </a>
+        <a href="#demo" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-white bg-slate-900/90 hover:bg-slate-800 border border-slate-700 font-bold rounded-full text-sm sm:text-base px-7 py-3.5 backdrop-blur-md transition-all">
+          <span>▶ Test 1.4-Second Simulator</span>
+        </a>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="flex flex-wrap items-center justify-center gap-4 text-[11px] sm:text-xs text-slate-300 font-medium mb-6">
+        <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-brand-lime" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> 3 Free Captures / Day Forever</span>
+        <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-brand-lime" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> Official Google OAuth 2.0 Direct Routing</span>
+        <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-brand-lime" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> 100% Account Safe (Document Idle)</span>
+      </div>
+
+      <!-- Universal Cross-Browser Compatibility Bar with Official SVG Icons -->
+      <div class="inline-flex flex-wrap items-center justify-center gap-3 sm:gap-5 px-5 py-2.5 rounded-2xl bg-black/60 border border-white/10 backdrop-blur-md text-xs text-slate-300 font-mono">
+        <span class="text-white font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-brand-lime"></span> Universal Engine:
+        </span>
+        
+        <!-- Google Chrome -->
+        <span class="flex items-center gap-1.5 text-slate-200 font-sans font-medium">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#EA4335" d="M12 5a7 7 0 0 1 6.06 3.5H12z"/>
+            <path fill="#4285F4" d="M12 19a7 7 0 0 1-6.06-3.5L9.5 9z"/>
+            <path fill="#FBBC05" d="M12 5l3.5 6.5H5.94A7 7 0 0 1 12 5z"/>
+            <circle cx="12" cy="12" r="3.5" fill="#FFFFFF"/>
+            <circle cx="12" cy="12" r="2.5" fill="#1A73E8"/>
+          </svg>
+          Chrome
+        </span>
+
+        <!-- Brave -->
+        <span class="flex items-center gap-1.5 text-slate-200 font-sans font-medium">
+          <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4zm0 4.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z"/>
+          </svg>
+          Brave
+        </span>
+
+        <!-- Edge -->
+        <span class="flex items-center gap-1.5 text-slate-200 font-sans font-medium">
+          <svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c2.4 0 4.6-.85 6.32-2.27-.4-.08-.79-.21-1.15-.39-3.23-1.61-4.17-5.06-2.56-8.29.35-.7.83-1.31 1.4-1.81A7.95 7.95 0 0 0 12 4z"/>
+          </svg>
+          Edge
+        </span>
+
+        <!-- Arc -->
+        <span class="flex items-center gap-1.5 text-slate-200 font-sans font-medium">
+          <svg class="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" fill="none"/>
+            <path d="M7 12a5 5 0 0 1 10 0" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+          Arc
+        </span>
+
+        <!-- Opera -->
+        <span class="flex items-center gap-1.5 text-slate-200 font-sans font-medium">
+          <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c2.4 0 4.6-.85 6.32-2.27-.4-.08-.79-.21-1.15-.39-3.23-1.61-4.17-5.06-2.56-8.29.35-.7.83-1.31 1.4-1.81A7.95 7.95 0 0 0 12 4z"/>
+          </svg>
+          Opera
+        </span>
+
+        <!-- Comet / Agentic -->
+        <span class="flex items-center gap-1.5 text-brand-lime font-sans font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Comet & AI Browsers
+        </span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 3. Section 2: The Problem with Approved Option A (Michael Chang In-Browser LinkedIn + Digital Beam) -->
+  <section id="problem" class="py-20 sm:py-28 bg-slate-950/80 border-y border-white/10 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="text-brand-lime text-xs font-mono font-bold tracking-widest uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">02 // THE PROBLEM</span>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-4 mb-4">
+          LinkedIn is built for scrolling. <br>
+          <span class="text-gradient-lime">Your outbound pipeline needs a system.</span>
+        </h2>
+        <p class="text-slate-400 text-base sm:text-lg">
+          The moment you spot a high-intent prospect, the clock starts ticking. Without an instant capture engine, research turns into administrative drag.
+        </p>
+      </div>
+
+      <!-- Approved Option A 4K Visual (Clean Digital Split-Screen on Alienware Display) -->
+      <div class="max-w-4xl mx-auto mb-14 rounded-3xl overflow-hidden border border-brand-lime/20 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+        <img src="assets/problem_chaos.jpg" alt="Authentic LinkedIn profile and manual copy-paste duplicate error spreadsheet" class="w-full h-auto object-cover">
+      </div>
+
+      <!-- Problem Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="p-8 rounded-3xl bg-brand-card border border-brand-lime/20 flex flex-col justify-between hover:border-brand-lime/40 transition-all">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-lime/10 border border-brand-lime/30 flex items-center justify-center text-brand-lime font-mono font-bold text-xl mb-6">
+              01
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">The Tab Graveyard</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              You leave 25 profile tabs open intending to message them later. Chrome crashes, memory spikes, and valuable relationship context vanishes into thin air.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/5 text-xs text-brand-lime font-mono">
+            [ 40% of warm leads lost ]
+          </div>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-brand-card border border-brand-lime/20 flex flex-col justify-between hover:border-brand-lime/40 transition-all">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-lime/10 border border-brand-lime/30 flex items-center justify-center text-brand-lime font-mono font-bold text-xl mb-6">
+              02
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">The 3.5-Minute Copying Chore</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Highlight name ➔ Copy ➔ Switch tab ➔ Paste ➔ Highlight email ➔ Copy ➔ Paste. 50 leads turns into 3 full hours of mind-numbing data entry.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/5 text-xs text-brand-lime font-mono">
+            [ 15+ hours wasted weekly ]
+          </div>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-brand-card border border-brand-lime/20 flex flex-col justify-between hover:border-brand-lime/40 transition-all">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-lime/10 border border-brand-lime/30 flex items-center justify-center text-brand-lime font-mono font-bold text-xl mb-6">
+              03
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">The Duplicate Trap</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Without collision detection, you accidentally pitch the same founder twice, looking sloppy and burning bridges with key target accounts.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/5 text-xs text-brand-lime font-mono">
+            [ Damaged sender reputation ]
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 4. Section 3: How It Works with Workflow Graphic -->
+  <section id="how-it-works" class="py-20 sm:py-28 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="text-brand-lime text-xs font-mono font-bold tracking-widest uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">03 // THE CAPTURE ENGINE</span>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-4 mb-4">
+          From fleeting visit to structured record in <span class="text-gradient-lime">1.4 seconds.</span>
+        </h2>
+      </div>
+
+      <!-- Section 3 Workflow Graphic -->
+      <div class="max-w-4xl mx-auto mb-14 rounded-3xl overflow-hidden border border-brand-lime/20 shadow-2xl">
+        <img src="assets/how_it_works.jpg" alt="TagSilo 3-step capture, tag, and organize workflow diagram" class="w-full h-auto object-cover">
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="p-8 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between hover:border-brand-lime/50 transition-all">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-lime/10 border border-brand-lime/30 flex items-center justify-center text-brand-lime font-mono font-bold text-lg mb-6">
+              01
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Spot the Prospect</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Browse LinkedIn normally. TagSilo's lightweight in-page parser automatically extracts full name, job headline, clean URL, and public contact email without refreshing.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/5 text-xs text-brand-lime font-mono">
+            [0.2s DOM Detection]
+          </div>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between hover:border-brand-lime/50 transition-all">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-lime/10 border border-brand-lime/30 flex items-center justify-center text-brand-lime font-mono font-bold text-lg mb-6">
+              02
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Tag the Intent & Signal</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Assign to your active pipeline group (e.g. <em>Q3 Outbound Blitz</em>), click qualification tags (<em>🎯 High Intent, 👑 Decision Maker</em>), and record custom follow-up notes.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/5 text-xs text-brand-lime font-mono">
+            [Multi-Tag Silos]
+          </div>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between hover:border-brand-lime/50 transition-all">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-lime/10 border border-brand-lime/30 flex items-center justify-center text-brand-lime font-mono font-bold text-lg mb-6">
+              03
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Sync the Living Record</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Hit "Sync to Google Sheets". The row is formatted, timestamped, and appended directly to your private Google Sheet on autopilot. Duplicate radar prevents repeat entries.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/5 text-xs text-brand-lime font-mono">
+            [Official Google OAuth 2.0]
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 5. Section 4: Interactive Live Simulator (Unboxed Clean Pipeline Column) -->
+  <section id="demo" class="py-20 sm:py-28 bg-slate-950/90 border-y border-white/10 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="text-brand-lime text-xs font-mono font-bold tracking-widest uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">04 // INTERACTIVE PLAYGROUND</span>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-4 mb-4">
+          Test the capture flow <span class="text-gradient-lime">live right now.</span>
+        </h2>
+        <p class="text-slate-400 text-base sm:text-lg">
+          Click tag badges below, customize your follow-up note, and hit <strong>"Sync to Google Sheets"</strong> to watch the live spreadsheet table update!
+        </p>
+      </div>
+
+      <!-- Simulator Outer Shell -->
+      <div class="max-w-5xl mx-auto rounded-3xl bg-brand-surface border border-brand-lime/30 p-4 sm:p-6 shadow-[0_0_50px_rgba(166,255,38,0.1)]">
+        
+        <!-- Browser Header -->
+        <div class="flex items-center justify-between pb-4 mb-6 border-b border-white/10 text-xs text-slate-400">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+          </div>
+          <div class="bg-black/60 px-4 py-1.5 rounded-full border border-white/10 font-mono text-[11px] text-slate-300">
+            🔒 https://linkedin.com/in/jordan-ellis-vp
+          </div>
+          <div class="flex items-center gap-1.5 text-brand-lime font-mono font-bold">
+            <span class="w-2 h-2 rounded-full bg-brand-lime animate-ping"></span>
+            TAGSILO_ACTIVE
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- Left: LinkedIn Mockup -->
+          <div class="lg:col-span-7 bg-brand-card rounded-2xl p-6 border border-white/10">
+            <div class="flex items-start gap-4">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Jordan Ellis" class="w-16 h-16 rounded-full border-2 border-brand-lime object-cover">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-lg font-bold text-white">Jordan Ellis</h3>
+                  <span class="text-[10px] bg-brand-lime/20 text-brand-lime px-2 py-0.5 rounded font-bold font-mono">1st</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-1">VP of Growth @ CloudScale AI • Scaling Outbound Pipelines</p>
+                <p class="text-[11px] text-slate-400 mt-1">📍 San Francisco Bay Area • 500+ Connections</p>
+              </div>
+            </div>
+
+            <div class="mt-4 p-3 rounded-xl bg-slate-900 border border-white/5 text-xs text-slate-300 flex items-center justify-between">
+              <span class="text-slate-400">Verified Contact Email:</span>
+              <span class="text-brand-lime font-mono font-bold">jordan.e@cloudscale.io</span>
+            </div>
+          </div>
+
+          <!-- Right: Interactive TagSilo Popup Simulator -->
+          <div class="lg:col-span-5 bg-slate-900 rounded-2xl p-5 border border-brand-lime/40 shadow-xl flex flex-col gap-4">
+            
+            <div class="flex items-center justify-between pb-2 border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded bg-brand-lime/20 text-brand-lime text-[10px] font-bold flex items-center justify-center font-mono">TS</span>
+                <span class="text-xs font-bold text-white">TagSilo Workspace</span>
+              </div>
+              <span class="text-[10px] bg-brand-pink text-white font-bold px-1.5 py-0.5 rounded font-mono">PRO</span>
+            </div>
+
+            <!-- Pipeline Selection -->
+            <div>
+              <label class="text-[11px] font-mono font-bold uppercase text-slate-400 mb-1.5 block">Pipeline Group</label>
+              <select id="simPipelineSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-lime font-sans">
+                <option value="🔥 Q3 Outbound Blitz">🔥 Q3 Outbound Blitz</option>
+                <option value="🚀 Series A Founders">🚀 Series A Founders</option>
+                <option value="🎯 Tech Talent Pipeline">🎯 Tech Talent Pipeline</option>
+              </select>
+            </div>
+
+            <!-- Quick Add Tags with Dynamic Clicking -->
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-[11px] font-mono font-bold uppercase text-slate-400">Attach Tags (Click to Toggle)</label>
+                <span id="simTagCounter" class="text-[10px] text-brand-lime font-mono font-bold">2 selected</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                <button type="button" class="sim-tag active px-2.5 py-1 rounded-md text-xs font-semibold border transition-all cursor-pointer" data-tag="🎯 High Intent">🎯 High Intent</button>
+                <button type="button" class="sim-tag active px-2.5 py-1 rounded-md text-xs font-semibold border transition-all cursor-pointer" data-tag="👑 Decision Maker">👑 Decision Maker</button>
+                <button type="button" class="sim-tag px-2.5 py-1 rounded-md text-xs font-semibold border transition-all cursor-pointer" data-tag="📅 Follow Up Q3">📅 Follow Up Q3</button>
+                <button type="button" class="sim-tag px-2.5 py-1 rounded-md text-xs font-semibold border transition-all cursor-pointer" data-tag="🤝 Warm Intro">🤝 Warm Intro</button>
+              </div>
+            </div>
+
+            <!-- Notes Input -->
+            <div>
+              <label class="text-[11px] font-mono font-bold uppercase text-slate-400 mb-1.5 block">Follow-Up Context</label>
+              <textarea id="simNotesInput" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white outline-none focus:border-brand-lime" placeholder="Add follow-up notes...">Discussing SDR list automation. Send case study Friday.</textarea>
+            </div>
+
+            <!-- Sync Button -->
+            <button id="simSyncBtn" class="w-full py-2.5 rounded-xl bg-brand-lime hover:bg-brand-limeHover text-brand-oled font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(166,255,38,0.35)] cursor-pointer">
+              <span id="simBtnSpinner" class="hidden animate-spin">⟳</span>
+              <span id="simBtnIcon">⚡</span>
+              <span id="simBtnText">Sync to Google Sheets</span>
+            </button>
+
+            <div id="simSuccessNotification" class="hidden p-2 rounded-lg bg-brand-lime/20 border border-brand-lime/40 text-brand-lime text-xs text-center font-mono font-bold">
+              ✓ Synced Lead #<span id="simRowCounter">14</span> to Google Sheet!
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Live Google Sheet Output (Clean Unboxed Pipeline Text) -->
+        <div class="mt-6 pt-6 border-t border-white/10">
+          <div class="flex items-center justify-between mb-3 text-xs">
+            <span class="text-slate-300 font-semibold flex items-center gap-2">
+              <span class="text-emerald-400 font-bold">📊</span> Connected Google Sheet: <em>TagSilo Pro - Leads & Pipelines</em>
+            </span>
+            <span class="text-[11px] text-brand-lime font-mono flex items-center gap-1.5 font-bold">
+              <span class="w-2 h-2 rounded-full bg-brand-lime animate-pulse"></span>
+              Live Cloud Sync
+            </span>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-white/10 bg-slate-950">
+            <table class="w-full text-left text-xs font-mono text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 border-b border-white/10">
+                <tr>
+                  <th class="py-2.5 px-3">Timestamp</th>
+                  <th class="py-2.5 px-3">Lead Name</th>
+                  <th class="py-2.5 px-3">Headline</th>
+                  <th class="py-2.5 px-3">Email</th>
+                  <th class="py-2.5 px-3">Pipeline</th>
+                  <th class="py-2.5 px-3">Tags</th>
+                  <th class="py-2.5 px-3">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="simSheetTableBody">
+                <tr class="border-b border-white/5 opacity-70">
+                  <td class="py-2 px-3 text-slate-400">2026-08-23 18:15</td>
+                  <td class="py-2 px-3 font-semibold text-white">David Mercer</td>
+                  <td class="py-2 px-3">Founder @ OrbitScale</td>
+                  <td class="py-2 px-3 text-brand-lime">d.mercer@orbit.co</td>
+                  <td class="py-2 px-3 text-slate-200 font-normal font-sans">🚀 Series A Founders</td>
+                  <td class="py-2 px-3">👑 Decision Maker</td>
+                  <td class="py-2 px-3 text-slate-400 truncate max-w-[150px]">Warm intro via Dave</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 6. Section 5: Features & Capabilities Bento Grid (with Multi-Profile Radar Visual) -->
+  <section id="features" class="py-20 sm:py-28 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="text-brand-lime text-xs font-mono font-bold tracking-widest uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">05 // CAPABILITIES</span>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-4 mb-4">
+          Engineered for speed. <br>
+          <span class="text-gradient-lime">Zero bloat. Pure outbound momentum.</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
+        
+        <!-- Bento 1 (8 cols with Multi-Profile Radar Scan) -->
+        <div class="md:col-span-8 rounded-3xl bg-brand-card border border-white/10 p-8 flex flex-col justify-between overflow-hidden relative">
+          <div>
+            <span class="text-brand-lime font-mono text-xs font-bold">01 // RADAR & TAXONOMY</span>
+            <h3 class="text-2xl font-bold text-white mt-2 mb-3">Multi-Tag Silos & Duplicate Collision Radar</h3>
+            <p class="text-slate-300 text-sm leading-relaxed max-w-xl">
+              Organize leads with custom color-coded tags. TagSilo cross-checks your Google Sheet to alert you if a prospect has already been captured, preventing duplicate outreach.
+            </p>
+          </div>
+          <div class="mt-8 rounded-2xl overflow-hidden border border-brand-lime/30 shadow-lg">
+            <img src="assets/bento_radar.jpg" alt="TagSilo Multi-Profile Radar Scan and Duplicate Collision Shield" class="w-full h-auto object-cover">
+          </div>
+        </div>
+
+        <!-- Bento 2 (4 cols) -->
+        <div class="md:col-span-4 rounded-3xl bg-brand-card border border-white/10 p-8 flex flex-col justify-between">
+          <div>
+            <span class="text-brand-lime font-mono text-xs font-bold">02 // EXTRACTION</span>
+            <h3 class="text-2xl font-bold text-white mt-2 mb-3">Instant In-Page Detection</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              No manual copy-pasting. TagSilo auto-parses full names, headlines, clean URLs, and verified contact emails in under 0.2 seconds.
+            </p>
+          </div>
+          <div class="mt-8 p-4 rounded-2xl bg-slate-950 border border-white/5 font-mono text-xs space-y-2 text-slate-300">
+            <div class="text-brand-lime font-bold">✓ PARSE_FULL_NAME</div>
+            <div class="text-brand-lime font-bold">✓ PARSE_JOB_HEADLINE</div>
+            <div class="text-brand-lime font-bold">✓ PARSE_CONTACT_EMAIL</div>
+            <div class="text-emerald-400 font-bold">➔ ROW_WRITTEN (1.2s)</div>
+          </div>
+        </div>
+
+        <!-- Bento 3 (4 cols) -->
+        <div class="md:col-span-4 rounded-3xl bg-brand-card border border-white/10 p-8 flex flex-col justify-between">
+          <div>
+            <span class="text-brand-emerald font-mono text-xs font-bold">03 // PRIVACY</span>
+            <h3 class="text-2xl font-bold text-white mt-2 mb-3">100% Private to Your Google Account</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              You own your data completely. TagSilo has zero access to your saved prospects and never monetizes your lists.
+            </p>
+          </div>
+          <div class="mt-8 flex items-center gap-3 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
+            <span>🛡️</span>
+            <span>Zero Third-Party Data Selling</span>
+          </div>
+        </div>
+
+        <!-- Bento 4 (8 cols) -->
+        <div class="md:col-span-8 rounded-3xl bg-brand-card border border-white/10 p-8 flex flex-col justify-between">
+          <div>
+            <span class="text-brand-pink font-mono text-xs font-bold">04 // OUTCOME</span>
+            <h3 class="text-2xl font-bold text-white mt-2 mb-3">Replace 5-Tab Chaos with Pure Flow</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Never switch between LinkedIn, email extractors, note apps, and spreadsheets again. Stay inside LinkedIn and capture leads without breaking your prospecting rhythm.
+            </p>
+          </div>
+          <div class="mt-6 grid grid-cols-2 gap-4 text-xs font-mono">
+            <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300">
+              ❌ Manual: 3.5 min/lead
+            </div>
+            <div class="p-3 rounded-xl bg-brand-lime/10 border border-brand-lime/30 text-brand-lime font-bold">
+              ⚡ TagSilo: 1.4 sec/lead
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 7. Dynamic ROI & Time-Saved Calculator -->
+  <section id="calculator" class="py-20 sm:py-28 bg-slate-950/80 border-y border-white/10 relative z-10">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <span class="text-brand-lime text-xs font-mono font-bold tracking-widest uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">06 // ROI QUANTIFIER</span>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-4 mb-4">
+          Calculate your <span class="text-gradient-lime">hours & dollars saved.</span>
+        </h2>
+        <p class="text-slate-400 text-base">
+          Adjust the sliders below to see how much time and labor cost TagSilo recovers for your outbound prospecting each month.
+        </p>
+      </div>
+
+      <div class="p-8 sm:p-12 rounded-3xl bg-brand-surface border border-brand-lime/30 shadow-2xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          <div class="lg:col-span-7 space-y-8">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <label class="text-sm font-semibold text-white">Daily LinkedIn Profiles Viewed:</label>
+                <span id="calcProfilesValue" class="text-base font-bold text-brand-lime font-mono">50 profiles</span>
+              </div>
+              <input type="range" id="calcProfilesSlider" min="10" max="250" value="50" step="5" class="w-full h-2 bg-slate-800 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                <span>10/day</span>
+                <span>125/day</span>
+                <span>250/day</span>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <label class="text-sm font-semibold text-white">Hourly Team Rate ($/hr):</label>
+                <span id="calcRateValue" class="text-base font-bold text-brand-lime font-mono">$40 / hr</span>
+              </div>
+              <input type="range" id="calcRateSlider" min="15" max="150" value="40" step="5" class="w-full h-2 bg-slate-800 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                <span>$15/hr</span>
+                <span>$80/hr</span>
+                <span>$150/hr</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 p-6 rounded-2xl bg-brand-card border border-brand-lime/40 shadow-[0_0_30px_rgba(166,255,38,0.1)] space-y-6">
+            <div>
+              <span class="text-xs uppercase tracking-wider text-slate-400 font-bold font-mono block">Monthly Hours Recovered</span>
+              <div class="flex items-baseline gap-2 mt-1">
+                <span id="calcHoursSaved" class="text-4xl font-extrabold text-brand-lime font-mono">21.9</span>
+                <span class="text-sm text-slate-300 font-semibold">Hours / mo</span>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-white/10">
+              <span class="text-xs uppercase tracking-wider text-slate-400 font-bold font-mono block">Labor Value Saved</span>
+              <div class="flex items-baseline gap-2 mt-1">
+                <span id="calcDollarsSaved" class="text-4xl font-extrabold text-brand-emerald font-mono">$875</span>
+                <span class="text-sm text-slate-300 font-semibold">/ month</span>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-white/10 flex justify-between items-center text-xs text-slate-300">
+              <span>TagSilo Pro: <strong>$9.99/mo</strong></span>
+              <span class="text-brand-lime font-mono font-bold">ROI: <span id="calcRoiPercent">8,658%</span></span>
+            </div>
+
+            <a href="#pricing" class="block w-full text-center py-3 rounded-full bg-brand-lime hover:bg-brand-limeHover text-brand-oled font-extrabold text-xs transition-all shadow-[0_0_20px_rgba(166,255,38,0.35)]">
+              Start Saving 21+ Hours ➔
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 8. Section 7: The Wall of Proof (Aligned Within Container with Gradient Fade Masks) -->
+  <section id="proof" class="py-20 sm:py-28 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="text-brand-lime text-xs font-mono font-bold tracking-widest uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">07 // WALL OF PROOF</span>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-4 mb-4">
+          Loved by founders, SDRs, recruiters, <br>
+          <span class="text-gradient-lime">& solo consultants worldwide.</span>
+        </h2>
+        <p class="text-slate-400 text-base sm:text-lg">
+          From bootstrapped solo creators to fast-scaling revenue teams—see how professionals capture clean pipelines without context switching.
+        </p>
+      </div>
+
+      <!-- 6 Featured Diverse Persona Stories (3x2 Grid) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        
+        <!-- Persona 1: Solo Founder -->
+        <div class="p-6 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between hover:border-brand-lime/40 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex text-amber-400 text-sm">★★★★★</div>
+              <span class="text-[10px] font-mono text-brand-lime bg-brand-lime/10 px-2 py-0.5 rounded border border-brand-lime/20 font-bold">SOLO FOUNDER</span>
+            </div>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+              "As a solo founder building an MVP, I needed to hunt down our first 30 beta users. I couldn't justify $150/mo for Apollo or HubSpot. TagSilo lets me tag design partners on LinkedIn and pushes them into my living Google Sheet in 1 second flat."
+            </p>
+          </div>
+          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" alt="Liam Vance" class="w-10 h-10 rounded-full border border-brand-lime object-cover">
+            <div>
+              <h4 class="text-xs font-bold text-white">Liam Vance</h4>
+              <p class="text-[11px] text-slate-400">Founder @ PromptScale AI</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Persona 2: Indie Growth Consultant -->
+        <div class="p-6 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between hover:border-brand-lime/40 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex text-amber-400 text-sm">★★★★★</div>
+              <span class="text-[10px] font-mono text-brand-cyan bg-brand-cyan/10 px-2 py-0.5 rounded border border-brand-cyan/20 font-bold">GROWTH CONSULTANT</span>
+            </div>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+              "I manage outbound campaigns for 4 different client agencies. With TagSilo's custom pipeline groups, I switch between client silos instantly. My clients love receiving clean, real-time Google Sheets updates without me ever leaving LinkedIn."
+            </p>
+          </div>
+          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80" alt="Sarah Chen" class="w-10 h-10 rounded-full border border-brand-cyan object-cover">
+            <div>
+              <h4 class="text-xs font-bold text-white">Sarah Chen</h4>
+              <p class="text-[11px] text-slate-400">Principal @ OutboundOrbit Agency</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Persona 3: University Student / Job Hunter -->
+        <div class="p-6 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between hover:border-brand-lime/40 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex text-amber-400 text-sm">★★★★★</div>
+              <span class="text-[10px] font-mono text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20 font-bold">GRADUATE / JOB HUNTER</span>
+            </div>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+              "Searching for my first tech role was overwhelming with 40 tabs of hiring managers and alumni. The Free tier of TagSilo was a lifesaver. I tagged every recruiter with custom notes, tracked my follow-ups, and landed 3 interviews in 2 weeks."
+            </p>
+          </div>
+          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&auto=format&fit=crop&q=80" alt="Mateo Rivera" class="w-10 h-10 rounded-full border border-emerald-400 object-cover">
+            <div>
+              <h4 class="text-xs font-bold text-white">Mateo Rivera</h4>
+              <p class="text-[11px] text-slate-400">Computer Science Grad @ UC Berkeley</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Persona 4: Freelance B2B SDR -->
+        <div class="p-6 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between hover:border-brand-lime/40 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex text-amber-400 text-sm">★★★★★</div>
+              <span class="text-[10px] font-mono text-brand-pink bg-brand-pink/10 px-2 py-0.5 rounded border border-brand-pink/20 font-bold">FREELANCE SDR</span>
+            </div>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+              "I get paid per qualified lead. Speed is literally money for me. TagSilo cut my lead capture time from 3.5 minutes per profile to under 2 seconds. I hit my weekly quotas on Wednesday afternoon now."
+            </p>
+          </div>
+          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&auto=format&fit=crop&q=80" alt="Marcus Vance" class="w-10 h-10 rounded-full border border-brand-pink object-cover">
+            <div>
+              <h4 class="text-xs font-bold text-white">Marcus Vance</h4>
+              <p class="text-[11px] text-slate-400">Contract Outbound Specialist</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Persona 5: Boutique Tech Recruiter -->
+        <div class="p-6 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between hover:border-brand-lime/40 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex text-amber-400 text-sm">★★★★★</div>
+              <span class="text-[10px] font-mono text-brand-lime bg-brand-lime/10 px-2 py-0.5 rounded border border-brand-lime/20 font-bold">TECH RECRUITER</span>
+            </div>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+              "Building specialized candidate talent pools in AI/ML requires reviewing hundreds of engineering profiles. The duplicate detection radar prevents me from accidentally reaching out to candidates my partner already contacted."
+            </p>
+          </div>
+          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop&q=80" alt="Elena Rostova" class="w-10 h-10 rounded-full border border-brand-lime object-cover">
+            <div>
+              <h4 class="text-xs font-bold text-white">Elena Rostova</h4>
+              <p class="text-[11px] text-slate-400">Head of Talent @ NextGen Capital</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Persona 6: Head of Outbound -->
+        <div class="p-6 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between hover:border-brand-lime/40 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex text-amber-400 text-sm">★★★★★</div>
+              <span class="text-[10px] font-mono text-brand-cyan bg-brand-cyan/10 px-2 py-0.5 rounded border border-brand-cyan/20 font-bold">HEAD OF OUTBOUND</span>
+            </div>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+              "We equipped our 6 SDRs with TagSilo Pro on the Team license. It recovered over 18 collective hours every week from copy-paste administrative work. Plus, because data routes directly through Google OAuth, our IT security approved it immediately."
+            </p>
+          </div>
+          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80" alt="Alex Rivera" class="w-10 h-10 rounded-full border border-brand-cyan object-cover">
+            <div>
+              <h4 class="text-xs font-bold text-white">Alex Rivera</h4>
+              <p class="text-[11px] text-slate-400">VP Outbound @ CloudScale</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Constrained Marquee Container Matching Static Width with Gradient Fade Masks -->
+      <div class="w-full overflow-hidden border border-white/10 rounded-2xl bg-black/40 py-3.5 backdrop-blur-md marquee-mask">
+        <div class="animate-marquee gap-6 items-center">
+          
+          <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-brand-card/90 border border-white/10 text-xs shrink-0">
+            <span class="text-brand-lime font-bold font-mono">★★★★★</span>
+            <span class="text-slate-200 font-medium">"Synced 450 leads this week without a single tab crash."</span>
+            <span class="text-slate-400 font-mono text-[10px]">— Kevin T., SDR</span>
+          </div>
+
+          <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-brand-card/90 border border-white/10 text-xs shrink-0">
+            <span class="text-brand-lime font-bold font-mono">★★★★★</span>
+            <span class="text-slate-200 font-medium">"The duplicate radar alone paid for TagSilo in 2 days."</span>
+            <span class="text-slate-400 font-mono text-[10px]">— Maya B., Agency Lead</span>
+          </div>
+
+          <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-brand-card/90 border border-white/10 text-xs shrink-0">
+            <span class="text-brand-lime font-bold font-mono">★★★★★</span>
+            <span class="text-slate-200 font-medium">"Runs buttery smooth on Brave and Arc."</span>
+            <span class="text-slate-400 font-mono text-[10px]">— Jason K., Growth Eng</span>
+          </div>
+
+          <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-brand-card/90 border border-white/10 text-xs shrink-0">
+            <span class="text-brand-lime font-bold font-mono">★★★★★</span>
+            <span class="text-slate-200 font-medium">"Easiest $9.99/mo expense on my card. Zero CRM bloat."</span>
+            <span class="text-slate-400 font-mono text-[10px]">— Daniel H., Founder</span>
+          </div>
+
+          <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-brand-card/90 border border-white/10 text-xs shrink-0">
+            <span class="text-brand-lime font-bold font-mono">★★★★★</span>
+            <span class="text-slate-200 font-medium">"Direct Google Sheet sync means no messy CSV exports."</span>
+            <span class="text-slate-400 font-mono text-[10px]">— Rachel P., Recruiter</span>
+          </div>
+
+          <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-brand-card/90 border border-white/10 text-xs shrink-0">
+            <span class="text-brand-lime font-bold font-mono">★★★★★</span>
+            <span class="text-slate-200 font-medium">"Setup took 45 seconds. Immediately useful."</span>
+            <span class="text-slate-400 font-mono text-[10px]">— Samira L., Sales Consultant</span>
+          </div>
+
+          <!-- Seamless loop repetition -->
+          <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-brand-card/90 border border-white/10 text-xs shrink-0">
+            <span class="text-brand-lime font-bold font-mono">★★★★★</span>
+            <span class="text-slate-200 font-medium">"Synced 450 leads this week without a single tab crash."</span>
+            <span class="text-slate-400 font-mono text-[10px]">— Kevin T., SDR</span>
+          </div>
+
+          <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-brand-card/90 border border-white/10 text-xs shrink-0">
+            <span class="text-brand-lime font-bold font-mono">★★★★★</span>
+            <span class="text-slate-200 font-medium">"The duplicate radar alone paid for TagSilo in 2 days."</span>
+            <span class="text-slate-400 font-mono text-[10px]">— Maya B., Agency Lead</span>
+          </div>
+
+          <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-brand-card/90 border border-white/10 text-xs shrink-0">
+            <span class="text-brand-lime font-bold font-mono">★★★★★</span>
+            <span class="text-slate-200 font-medium">"Runs buttery smooth on Brave and Arc."</span>
+            <span class="text-slate-400 font-mono text-[10px]">— Jason K., Growth Eng</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 9. Section 8: Pricing Grid (Free vs Pro vs Team + Annual Switch) -->
+  <section id="pricing" class="py-20 sm:py-28 bg-slate-950/80 border-t border-white/10 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="text-brand-lime text-xs font-mono font-bold tracking-widest uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">08 // PRICING</span>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-4 mb-4">
+          Predictable pricing. <br>
+          <span class="text-gradient-lime">Start free, upgrade when you scale.</span>
+        </h2>
+        
+        <!-- Toggle Button -->
+        <div class="inline-flex items-center p-1 rounded-full bg-slate-900 border border-white/10 mt-4">
+          <button id="billingMonthlyBtn" class="px-5 py-2 rounded-full text-xs font-bold text-brand-oled bg-brand-lime transition-all">Monthly</button>
+          <button id="billingAnnualBtn" class="px-5 py-2 rounded-full text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center gap-1.5">
+            <span>Annual</span>
+            <span class="bg-brand-pink text-white text-[10px] px-2 py-0.5 rounded-full font-extrabold">Save 35%</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
+        
+        <!-- Free Plan -->
+        <div class="p-8 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between">
+          <div>
+            <h3 class="text-xl font-bold text-white">Free Forever</h3>
+            <p class="text-slate-400 text-xs mt-1">For casual prospecting, students & testing.</p>
+            <div class="my-6">
+              <span class="text-4xl font-extrabold text-white">$0</span>
+              <span class="text-slate-400 text-sm">/ forever</span>
+            </div>
+            <ul class="space-y-3 text-xs text-slate-300">
+              <li class="flex items-center gap-2">✓ 3 Profile Captures / Day</li>
+              <li class="flex items-center gap-2">✓ Up to 2 Tags per Lead</li>
+              <li class="flex items-center gap-2">✓ 1 Active Pipeline Group</li>
+              <li class="flex items-center gap-2">✓ Add, Edit & Delete Custom Tags</li>
+              <li class="flex items-center gap-2">✓ Direct Google Sheets Sync</li>
+              <li class="flex items-center gap-2">✓ Duplicate Detection Radar</li>
+            </ul>
+          </div>
+          <a href="https://chrome.google.com/webstore" target="_blank" class="mt-8 block text-center py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors">
+            Install Free Extension
+          </a>
+        </div>
+
+        <!-- Pro Plan (Featured) -->
+        <div class="p-8 rounded-3xl bg-gradient-to-b from-brand-lime/15 via-brand-card to-brand-card border-2 border-brand-lime flex flex-col justify-between relative shadow-[0_0_50px_rgba(166,255,38,0.15)]">
+          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand-pink text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+            MOST POPULAR
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-brand-lime">TagSilo Pro</h3>
+            <p class="text-slate-300 text-xs mt-1">For active SDRs, founders & agency owners.</p>
+            <div class="my-6">
+              <span id="priceDisplay" class="text-4xl font-extrabold text-white font-mono">$9.99</span>
+              <span id="pricePeriodDisplay" class="text-slate-300 text-sm">/ month</span>
+            </div>
+            <ul class="space-y-3 text-xs text-slate-200">
+              <li class="flex items-center gap-2 font-bold text-brand-lime">✓ Unlimited Daily Profile Syncs</li>
+              <li class="flex items-center gap-2 font-bold text-brand-lime">✓ Unlimited Custom Pipeline Groups</li>
+              <li class="flex items-center gap-2 font-bold text-brand-lime">✓ Unlimited Simultaneous Tags per Lead</li>
+              <li class="flex items-center gap-2">✓ Custom Tag Taxonomy Builder</li>
+              <li class="flex items-center gap-2">✓ Real-time Duplicate Collision Radar</li>
+              <li class="flex items-center gap-2">✓ Google Sheets Automated Routing</li>
+              <li class="flex items-center gap-2">✓ Priority Email & Chat Support</li>
+            </ul>
+          </div>
+          <a id="proCheckoutBtn" href="https://creem.io/checkout/tagsilo-pro" target="_blank" class="mt-8 block text-center py-3.5 rounded-full bg-brand-lime hover:bg-brand-limeHover text-brand-oled font-extrabold text-sm transition-all shadow-[0_0_25px_rgba(166,255,38,0.4)]">
+            🚀 Upgrade to Pro Plan
+          </a>
+        </div>
+
+        <!-- Team Plan -->
+        <div class="p-8 rounded-3xl bg-brand-card border border-white/10 flex flex-col justify-between">
+          <div>
+            <h3 class="text-xl font-bold text-white">Team & Agency</h3>
+            <p class="text-slate-400 text-xs mt-1">For sales teams sharing centralized databases.</p>
+            <div class="my-6">
+              <span class="text-4xl font-extrabold text-white font-mono">$29</span>
+              <span class="text-slate-400 text-sm">/ mo (5 Seats)</span>
+            </div>
+            <ul class="space-y-3 text-xs text-slate-300">
+              <li class="flex items-center gap-2">✓ Everything in Pro</li>
+              <li class="flex items-center gap-2">✓ 5 Included Team Seat Licenses</li>
+              <li class="flex items-center gap-2">✓ Shared Central Google Sheet Routing</li>
+              <li class="flex items-center gap-2">✓ Team-wide Duplicate Prevention</li>
+              <li class="flex items-center gap-2">✓ Dedicated Onboarding Setup</li>
+            </ul>
+          </div>
+          <a href="mailto:support@tagsilo.com?subject=TagSilo%20Team%20Inquiry" class="mt-8 block text-center py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors">
+            Contact for Team License
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 10. Section 9: Flowbite FAQ Accordion (8 Comprehensive Questions) -->
+  <section id="faq" class="py-20 sm:py-28 bg-slate-950/90 border-t border-white/10 relative z-10">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <span class="text-brand-lime text-xs font-mono font-bold tracking-widest uppercase bg-brand-lime/10 px-3 py-1 rounded-full border border-brand-lime/30">09 // FAQ</span>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-4 mb-4">
+          Frequently asked <span class="text-gradient-lime">questions.</span>
+        </h2>
+      </div>
+
+      <div id="accordion-flush" data-accordion="collapse" data-active-classes="bg-transparent text-white" data-inactive-classes="text-slate-400" class="space-y-4">
+        
+        <!-- Q1: LinkedIn Safety -->
+        <div class="p-6 rounded-2xl bg-brand-card border border-white/10">
+          <h2 id="accordion-flush-heading-1">
+            <button type="button" class="flex items-center justify-between w-full font-bold text-left text-white text-base gap-3" data-accordion-target="#accordion-flush-body-1" aria-expanded="true" aria-controls="accordion-flush-body-1">
+              <span>Will using TagSilo put my LinkedIn account at risk?</span>
+              <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0 text-brand-lime" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+              </svg>
+            </button>
+          </h2>
+          <div id="accordion-flush-body-1" class="hidden" aria-labelledby="accordion-flush-heading-1">
+            <div class="py-4 border-t border-white/5 mt-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <strong>No.</strong> Unlike aggressive cloud scraper bots that spam automated requests, TagSilo operates locally inside your browser on <code>document_idle</code>. It captures data only when you visit a profile and click Sync. It never triggers automated bot flags or violates LinkedIn's Terms of Service.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q2: Non-standard / Agentic Browser Compatibility -->
+        <div class="p-6 rounded-2xl bg-brand-card border border-white/10">
+          <h2 id="accordion-flush-heading-2">
+            <button type="button" class="flex items-center justify-between w-full font-bold text-left text-white text-base gap-3" data-accordion-target="#accordion-flush-body-2" aria-expanded="false" aria-controls="accordion-flush-body-2">
+              <span>I am not using any of the browsers you mentioned TagSilo supports, will it still work? (e.g. BrowserOS, Comet, Perplexity Browser, or new Agentic Browsers)</span>
+              <svg data-accordion-icon class="w-3 h-3 shrink-0 text-brand-lime" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+              </svg>
+            </button>
+          </h2>
+          <div id="accordion-flush-body-2" class="hidden" aria-labelledby="accordion-flush-heading-2">
+            <div class="py-4 border-t border-white/5 mt-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <strong>Yes!</strong> Any modern browser built on the Chromium open-source engine (including BrowserOS, Comet, Perplexity Browser, and emerging AI/Agentic browsers) supports Chrome Web Store extensions out of the box. As long as your browser supports standard Manifest V3 extensions, TagSilo will run seamlessly.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q3: Data Ownership & Storage -->
+        <div class="p-6 rounded-2xl bg-brand-card border border-white/10">
+          <h2 id="accordion-flush-heading-3">
+            <button type="button" class="flex items-center justify-between w-full font-bold text-left text-white text-base gap-3" data-accordion-target="#accordion-flush-body-3" aria-expanded="false" aria-controls="accordion-flush-body-3">
+              <span>Where is my prospect data stored and who owns it?</span>
+              <svg data-accordion-icon class="w-3 h-3 shrink-0 text-brand-lime" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+              </svg>
+            </button>
+          </h2>
+          <div id="accordion-flush-body-3" class="hidden" aria-labelledby="accordion-flush-heading-3">
+            <div class="py-4 border-t border-white/5 mt-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <strong>You own 100% of your data. TagSilo has zero access to any of your saved leads or contacts.</strong> Your data routes directly from your browser into your own private Google Sheet via Google's official OAuth 2.0 API. We do not store, sell, rent, or monetize your prospect lists.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q4: Duplicate Detection (Exact Required Answer) -->
+        <div class="p-6 rounded-2xl bg-brand-card border border-white/10">
+          <h2 id="accordion-flush-heading-4">
+            <button type="button" class="flex items-center justify-between w-full font-bold text-left text-white text-base gap-3" data-accordion-target="#accordion-flush-body-4" aria-expanded="false" aria-controls="accordion-flush-body-4">
+              <span>How does real-time duplicate lead detection work?</span>
+              <svg data-accordion-icon class="w-3 h-3 shrink-0 text-brand-lime" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+              </svg>
+            </button>
+          </h2>
+          <div id="accordion-flush-body-4" class="hidden" aria-labelledby="accordion-flush-heading-4">
+            <div class="py-4 border-t border-white/5 mt-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              The moment you open a LinkedIn profile, TagSilo cross-references the URL against your active Google Sheet and displays an instant "Already Saved" badge with the previous save date if the profile has already been saved.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q5: Sales Navigator / Recruiter Compatibility -->
+        <div class="p-6 rounded-2xl bg-brand-card border border-white/10">
+          <h2 id="accordion-flush-heading-5">
+            <button type="button" class="flex items-center justify-between w-full font-bold text-left text-white text-base gap-3" data-accordion-target="#accordion-flush-body-5" aria-expanded="false" aria-controls="accordion-flush-body-5">
+              <span>Do I need a paid LinkedIn Sales Navigator or Recruiter account?</span>
+              <svg data-accordion-icon class="w-3 h-3 shrink-0 text-brand-lime" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+              </svg>
+            </button>
+          </h2>
+          <div id="accordion-flush-body-5" class="hidden" aria-labelledby="accordion-flush-heading-5">
+            <div class="py-4 border-t border-white/5 mt-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <strong>No.</strong> TagSilo works seamlessly across Free standard LinkedIn profiles (<code>/in/*</code>), LinkedIn Sales Navigator, and LinkedIn Recruiter. You can capture leads on any account tier.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q6: Free vs Pro Plan Breakdown -->
+        <div class="p-6 rounded-2xl bg-brand-card border border-white/10">
+          <h2 id="accordion-flush-heading-6">
+            <button type="button" class="flex items-center justify-between w-full font-bold text-left text-white text-base gap-3" data-accordion-target="#accordion-flush-body-6" aria-expanded="false" aria-controls="accordion-flush-body-6">
+              <span>What is included in the Free Forever plan vs. Pro?</span>
+              <svg data-accordion-icon class="w-3 h-3 shrink-0 text-brand-lime" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+              </svg>
+            </button>
+          </h2>
+          <div id="accordion-flush-body-6" class="hidden" aria-labelledby="accordion-flush-heading-6">
+            <div class="py-4 border-t border-white/5 mt-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              The <strong>Free Forever plan</strong> includes 3 profile captures per day, 1 active pipeline group, up to 2 tags per lead, Google Sheets sync, and duplicate detection. Free users can freely add, edit, and delete custom tags and groups. <strong>TagSilo Pro ($9.99/mo)</strong> unlocks unlimited daily profile syncs, unlimited simultaneous tags per lead, unlimited pipeline groups, and priority support.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q7: Team Sharing & Central Spreadsheets -->
+        <div class="p-6 rounded-2xl bg-brand-card border border-white/10">
+          <h2 id="accordion-flush-heading-7">
+            <button type="button" class="flex items-center justify-between w-full font-bold text-left text-white text-base gap-3" data-accordion-target="#accordion-flush-body-7" aria-expanded="false" aria-controls="accordion-flush-body-7">
+              <span>Can our sales agency or team share a central spreadsheet?</span>
+              <svg data-accordion-icon class="w-3 h-3 shrink-0 text-brand-lime" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+              </svg>
+            </button>
+          </h2>
+          <div id="accordion-flush-body-7" class="hidden" aria-labelledby="accordion-flush-heading-7">
+            <div class="py-4 border-t border-white/5 mt-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <strong>Yes!</strong> On our Team plan ($29/mo for 5 seats), all reps can route prospects into a shared central Google Sheet. TagSilo’s duplicate radar works team-wide, preventing different SDRs from pitching the same company twice.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q8: Setup Speed & No Credit Card -->
+        <div class="p-6 rounded-2xl bg-brand-card border border-white/10">
+          <h2 id="accordion-flush-heading-8">
+            <button type="button" class="flex items-center justify-between w-full font-bold text-left text-white text-base gap-3" data-accordion-target="#accordion-flush-body-8" aria-expanded="false" aria-controls="accordion-flush-body-8">
+              <span>How fast is setup and do I need to enter credit card details?</span>
+              <svg data-accordion-icon class="w-3 h-3 shrink-0 text-brand-lime" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+              </svg>
+            </button>
+          </h2>
+          <div id="accordion-flush-body-8" class="hidden" aria-labelledby="accordion-flush-heading-8">
+            <div class="py-4 border-t border-white/5 mt-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Setup takes <strong>under 60 seconds</strong>. Add the extension from the Chrome Web Store, connect your Google account with 1 click, and start saving leads immediately. <strong>No credit card is required</strong> to use the Free plan.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 11. Final Call to Action -->
+  <section class="py-20 sm:py-28 relative z-10">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="p-10 sm:p-16 rounded-3xl bg-gradient-to-b from-brand-lime/20 via-brand-card to-brand-surface border border-brand-lime/40 shadow-2xl">
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-6">
+          Ready to stop losing warm leads <br>
+          <span class="text-gradient-lime">in open tabs?</span>
+        </h2>
+        <p class="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto mb-10">
+          Get started with TagSilo for free in under 60 seconds across all your favorite browsers. Zero setup friction.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="https://chrome.google.com/webstore" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 text-brand-oled bg-brand-lime hover:bg-brand-limeHover font-extrabold rounded-full text-base px-8 py-4 shadow-[0_0_35px_rgba(166,255,38,0.4)] transition-all">
+            <span>⚡ Add TagSilo to Browser — Free</span>
+            <span class="font-mono">➔</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. Footer with Official Vector Logo Asset -->
+  <footer class="mt-auto py-12 border-t border-white/10 bg-black text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <img src="assets/tagsilo-wordmark-matched-dark.svg" alt="TagSilo Pro" class="h-7 w-auto object-contain">
+        <span>© 2026 TagSilo Software. All rights reserved.</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="privacy.html" class="hover:text-brand-lime transition-colors">Privacy Policy</a>
+        <a href="mailto:support@tagsilo.com" class="hover:text-brand-lime transition-colors">Support</a>
+        <a href="https://chrome.google.com/webstore" target="_blank" class="hover:text-brand-lime transition-colors">Chrome Store</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Back to Top Button -->
+  <button id="backToTopBtn" type="button" aria-label="Back to top" class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-brand-surface/90 border border-brand-lime text-brand-lime hover:bg-brand-lime hover:text-brand-oled shadow-[0_0_20px_rgba(166,255,38,0.3)] transition-all duration-300 opacity-0 pointer-events-none translate-y-4 backdrop-blur-md cursor-pointer">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+    </svg>
+  </button>
+
+  <!-- Flowbite JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <!-- Interactive App Engine -->
+  <script src="app.js"></script>
+</body>
+</html>

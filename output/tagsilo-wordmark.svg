@@ -1,0 +1,13 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 100" role="img" aria-label="TagSilo logo">
+  <!-- Official TagSilo Precision 'T' Symbol with Punch Hole and Angled Notch -->
+  <g transform="translate(10, 10)">
+    <path d="M 6 28 C 6 10 18 2 36 2 C 54 2 66 10 66 28 Z" fill="#A6FF26"/>
+    <path d="M 23 28 L 49 28 L 49 60 L 37 72 L 23 72 Z" fill="#A6FF26"/>
+    <circle cx="36" cy="45" r="5.5" fill="#06080D"/>
+    <polygon points="49,60 49,72 37,72" fill="#06080D" opacity="0.9"/>
+  </g>
+  <!-- Wordmark Text (Y: 58 with viewBox height: 100 for 'g' descender) -->
+  <text x="96" y="58" font-family="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif" font-size="44" font-weight="800" letter-spacing="-1px">
+    <tspan fill="#06080D">Tag</tspan><tspan fill="#84D815">Silo</tspan>
+  </text>
+</svg>

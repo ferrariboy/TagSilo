@@ -1,0 +1,13 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TagSilo favicon">
+  <!-- Official TagSilo Precision 'T' Symbol (Transparent Background, Centered & Maximized) -->
+  <g transform="translate(6, 4)">
+    <!-- Mushroom/Vault T-Top -->
+    <path d="M 4 20 C 4 7 14 1 26 1 C 38 1 48 7 48 20 Z" fill="#A6FF26"/>
+    <!-- Stem with punch-hole & angled notch -->
+    <path d="M 16 20 L 36 20 L 36 45 L 26 55 L 16 55 Z" fill="#A6FF26"/>
+    <!-- Tag Punch Hole -->
+    <circle cx="26" cy="31" r="4.2" fill="#06080D"/>
+    <!-- Angled Bottom Notch Accent -->
+    <polygon points="36,45 36,55 26,55" fill="#06080D" opacity="0.95"/>
+  </g>
+</svg>

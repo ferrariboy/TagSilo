@@ -1,0 +1,164 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TagSilo Logo Concepts - Preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #06080D;
+      color: #F8FAFC;
+      padding: 40px 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .header h1 {
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, #00F5D4 0%, #38BDF8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .header p {
+      color: #94A3B8;
+      font-size: 1rem;
+    }
+    .palette-bar {
+      display: inline-flex;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 999px;
+    }
+    .palette-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #CBD5E1;
+    }
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #0A0E17;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 20px;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 245, 212, 0.4);
+      box-shadow: 0 12px 30px rgba(0, 245, 212, 0.08);
+    }
+    .img-container {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 16px;
+    }
+    .img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #F8FAFC;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      font-size: 0.88rem;
+      color: #94A3B8;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .badge {
+      align-self: flex-start;
+      margin-bottom: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: rgba(0, 245, 212, 0.12);
+      color: #00F5D4;
+      border: 1px solid rgba(0, 245, 212, 0.25);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>TagSilo Brand Logo Explorations</h1>
+    <p>Generated with <strong>logo-creator</strong> skill &bull; Vanguard Design System Colors</p>
+    <div class="palette-bar">
+      <div class="palette-item"><span class="dot" style="background:#06080D"></span> #06080D (OLED Base)</div>
+      <div class="palette-item"><span class="dot" style="background:#00F5D4"></span> #00F5D4 (Electric Teal)</div>
+      <div class="palette-item"><span class="dot" style="background:#38BDF8"></span> #38BDF8 (Vivid Cyan)</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <span class="badge">Option #1 &bull; Pictorial</span>
+      <div class="img-container">
+        <img src="logo-01.png" alt="Logo 01">
+      </div>
+      <h3 class="card-title">Cyber Silo & Integrated Token Tag</h3>
+      <p class="card-desc">Cylindrical data barrel wireframe enclosing an angled metadata tag with digital asset glyph.</p>
+    </div>
+
+    <div class="card">
+      <span class="badge">Option #2 &bull; Geometric</span>
+      <div class="img-container">
+        <img src="logo-02.png" alt="Logo 02">
+      </div>
+      <h3 class="card-title">Tiered Silo & Hard Tag Badge</h3>
+      <p class="card-desc">Three-tier database storage disk cylinder intersecting a bold geometric tag cutout.</p>
+    </div>
+
+    <div class="card">
+      <span class="badge">Option #3 &bull; Monogram</span>
+      <div class="img-container">
+        <img src="logo-03.png" alt="Logo 03">
+      </div>
+      <h3 class="card-title">Interlocking 'TS' Monogram Mark</h3>
+      <p class="card-desc">Architectural 'T' &amp; 'S' lettermark intertwined with a cybernetic tag loop anchor.</p>
+    </div>
+
+    <div class="card">
+      <span class="badge">Option #4 &bull; Abstract Hex</span>
+      <div class="img-container">
+        <img src="logo-04.png" alt="Logo 04">
+      </div>
+      <h3 class="card-title">Hexagonal Vault Silo Node</h3>
+      <p class="card-desc">Isometric security vault perimeter framing an inner glowing tag node.</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TagSilo Pro - Management Console</title>
+  <link rel="stylesheet" href="options.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="options-container">
+    <!-- Top Header -->
+    <header class="options-header">
+      <div class="header-brand">
+        <img src="assets/tagsilo-wordmark-matched-dark.svg" alt="TagSilo Pro" class="options-brand-wordmark">
+        <p class="header-subtitle">Manage automated Google Sheets synchronization, software license plans, and custom tagging taxonomies.</p>
+      </div>
+      <div id="tierBadgeHeader" class="tier-badge free">FREE TIER</div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="options-grid">
+      <!-- 1. Google OAuth Identity Module -->
+      <section class="options-card">
+        <div class="card-title-row">
+          <div class="card-icon">⚡</div>
+          <div>
+            <h2 class="card-title">Google Account Integration</h2>
+            <p class="card-desc">1-Click Google OAuth 2.0 authorization routes your captured leads directly into your private Google Sheets spreadsheet.</p>
+          </div>
+        </div>
+
+        <div class="user-identity-box">
+          <div class="user-avatar-wrap">
+            <img id="optUserAvatarImg" class="opt-avatar" src="" alt="Google Profile" style="display: none;">
+            <div id="optUserAvatarPh" class="opt-avatar-placeholder">G</div>
+          </div>
+          <div class="user-details">
+            <div id="optUserName" class="opt-user-name">Google Account Not Connected</div>
+            <div id="optUserEmail" class="opt-user-email">Authorize to enable automated Google Sheets spreadsheet routing</div>
+            <div id="optStatusIndicator" class="status-indicator active" style="display: none;">
+              <span class="status-dot"></span> Authorized & Active
+            </div>
+          </div>
+          <div class="identity-action">
+            <button id="optSignInBtn" class="btn-neon-teal">
+              <svg width="16" height="16" viewBox="0 0 24 24">
+                <path fill="#090D16" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#090D16" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#090D16" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#090D16" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Connect Google Account</span>
+            </button>
+            <button id="optDisconnectBtn" class="btn-danger-outline" style="display: none;">
+              Disconnect
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Direct Google Sheet Pipeline Navigation Module -->
+      <section class="options-card highlight-card">
+        <div class="card-title-row">
+          <div class="card-icon" style="background: rgba(52, 168, 83, 0.15); border-color: rgba(52, 168, 83, 0.35); color: #34A853;">📊</div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+              <h2 class="card-title">Connected Google Sheet Pipeline</h2>
+              <span id="sheetStatusBadge" class="sheet-status-badge">Checking...</span>
+            </div>
+            <p class="card-desc">Direct access to your live cloud spreadsheet where all captured LinkedIn profiles, verified emails, tags, and notes are organized.</p>
+          </div>
+        </div>
+
+        <div class="sheet-link-box">
+          <div class="sheet-info-col">
+            <div class="sheet-title-text" id="sheetTitleDisplay">TagSilo Pro - Leads & Pipelines</div>
+            <div class="sheet-id-subtext" id="sheetIdDisplay">Spreadsheet ID: Not yet generated (Sync your first lead to create)</div>
+          </div>
+          <div class="sheet-actions-col">
+            <a id="openSheetTabBtn" class="btn-neon-teal" href="#" target="_blank" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
+              </svg>
+              <span>Open in Google Sheets ↗</span>
+            </a>
+            <button id="copySheetLinkBtn" class="btn-subtle" title="Copy Spreadsheet Link">Copy Link</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. License Management & Discount Code Module -->
+      <section class="options-card">
+        <div class="card-title-row">
+          <div class="card-icon">👑</div>
+          <div>
+            <h2 class="card-title">Software License & Plan Tier</h2>
+            <p class="card-desc">Enter your license key to activate your Pro plan.</p>
+          </div>
+        </div>
+
+        <div class="license-input-group">
+          <input type="text" id="licenseKeyInput" class="license-input" placeholder="e.g. TS-PRO-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off">
+          <button id="saveLicenseBtn" class="btn-neon-teal">Validate & Save</button>
+        </div>
+
+        <div class="discount-code-block">
+          <label class="section-sub-label">
+            Discount Code / Promo Code
+          </label>
+          <div class="license-input-group">
+            <input type="text" id="discountCodeInput" class="license-input" placeholder="Enter promo code (e.g. 100% off)..." spellcheck="false" autocomplete="off">
+            <button id="applyDiscountBtn" class="btn-subtle">Apply & Validate</button>
+          </div>
+          <div id="discountStatusMsg" class="discount-status-msg" style="display: none;"></div>
+        </div>
+
+        <div class="license-metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Activation Status</span>
+            <span id="metricStatus" class="metric-value inactive">Free Tier (No Key)</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Pipeline Limits</span>
+            <span id="metricLimits" class="metric-value">Gated (Max 2 Tags, 1 Group)</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Active Plan</span>
+            <span id="metricTier" class="metric-value">Free Tier (3 Saves/Day)</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Next Renewal</span>
+            <span id="metricExpiry" class="metric-value">N/A (Free Account)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Pipeline Tags Taxonomy Manager -->
+      <section class="options-card">
+        <div class="card-title-row">
+          <div class="card-icon">🏷️</div>
+          <div>
+            <h2 class="card-title">Pipeline Quick Add Tags</h2>
+            <p class="card-desc">Configure one-click lead qualification tags for your extension popup interface.</p>
+          </div>
+        </div>
+
+        <div id="tagGatingAlert" class="gating-alert-banner" style="display: none;">
+          <span class="alert-icon">🔒</span>
+          <span class="alert-text">Premium Account Feature: Please activate a valid Pro License Key or Promo Code to build unlimited tracking pipelines.</span>
+        </div>
+
+        <div class="tag-manager-container">
+          <div id="tagsListContainer" class="tags-chips-list">
+            <!-- Dynamic tags -->
+          </div>
+
+          <div class="add-tag-row">
+            <input type="text" id="newTagInput" class="input-text" placeholder="New tag name (e.g. 🎯 High Intent)...">
+            <button id="addTagBtn" class="btn-subtle">+ Add Tag</button>
+            <button id="resetTagsBtn" class="btn-text-only">Reset Defaults</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Pipeline Groups Manager -->
+      <section class="options-card">
+        <div class="card-title-row">
+          <div class="card-icon">📁</div>
+          <div>
+            <h2 class="card-title">Pipeline Tracking Groups</h2>
+            <p class="card-desc">Segment your target leads into distinct lists and routing workflows.</p>
+          </div>
+        </div>
+
+        <div id="groupGatingAlert" class="gating-alert-banner" style="display: none;">
+          <span class="alert-icon">🔒</span>
+          <span class="alert-text">Premium Account Feature: Please activate a valid Pro License Key or Promo Code to build unlimited tracking pipelines.</span>
+        </div>
+
+        <div class="group-manager-container">
+          <div id="groupsListContainer" class="groups-list">
+            <!-- Dynamic groups -->
+          </div>
+
+          <div class="add-group-row">
+            <input type="text" id="newGroupInput" class="input-text" placeholder="New pipeline group (e.g. Series A Founders)...">
+            <button id="addGroupBtn" class="btn-subtle">+ Add Group</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Save Toast -->
+    <div id="saveToast" class="save-toast">
+      <span class="toast-check">✓</span>
+      <span id="saveToastMsg">Settings Saved Successfully!</span>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

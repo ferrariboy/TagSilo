@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="TagSilo monogram">
+  <rect x="8" y="8" width="144" height="144" rx="32" fill="#06080D" stroke="rgba(166, 255, 38, 0.4)" stroke-width="2.5"/>
+  <!-- Official TagSilo Precision 'T' Symbol with Punch Hole and Angled Notch -->
+  <g transform="translate(36, 32)">
+    <!-- Mushroom/Vault T-Top -->
+    <path d="M 8 36 C 8 14 26 4 44 4 C 62 4 80 14 80 36 Z" fill="#A6FF26"/>
+    <!-- Stem with punch-hole & angled notch -->
+    <path d="M 28 36 L 60 36 L 60 76 L 44 92 L 28 92 Z" fill="#A6FF26"/>
+    <!-- Tag Punch Hole -->
+    <circle cx="44" cy="56" r="7" fill="#06080D"/>
+    <!-- Angled Bottom Notch Accent -->
+    <polygon points="60,76 60,92 44,92" fill="#06080D" opacity="0.95"/>
+  </g>
+</svg>
