@@ -814,12 +814,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const text = cleanTag(rawText);
     if (!text) return;
 
-    if (!isProUser && activeTags.size >= 2 && !activeTags.has(text)) {
-      if (inlineTagLimitBanner) inlineTagLimitBanner.classList.add("visible");
+    if (!isProUser && quickTags.length >= 2 && !quickTags.some((t) => cleanTag(t) === text)) {
+      if (inlineTagLimitBanner) {
+        inlineTagLimitBanner.textContent = "Free tier is limited to 2 profile tags. Upgrade to Pro for unlimited tags.";
+        inlineTagLimitBanner.classList.add("visible");
+      }
       return;
     }
 
-    activeTags.add(text);
+    // Add to quick presets list (do NOT auto-select into activeTags)
     if (!quickTags.some((t) => cleanTag(t) === text)) {
       quickTags.push(text);
       await chrome.storage.local.set({ quick_tags: quickTags, tagsilo_tags: quickTags, quick_tags_initialized: true });
@@ -830,7 +833,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     customActiveTagInput.value = "";
-    renderActiveTags();
     updateQuickTagButtons();
     if (inlineTagLimitBanner) inlineTagLimitBanner.classList.remove("visible");
   };
