@@ -210,8 +210,8 @@ body {
 .tier-badge.pro {
   background: var(--accent-lime-dim);
   color: var(--accent-lime);
-  border: 2px solid var(--accent-lime);
-  box-shadow: 0 0 8px rgba(166, 255, 38, 0.25);
+  border: 1px solid rgba(166, 255, 38, 0.4);
+  box-shadow: 0 0 8px rgba(166, 255, 38, 0.2);
 }
 
 .header-actions {
@@ -237,9 +237,9 @@ body {
 
 .quota-pill.pro-pill {
   background: var(--accent-lime-dim);
-  border: 2px solid var(--accent-lime);
+  border: 1px solid rgba(166, 255, 38, 0.35);
   color: var(--accent-lime);
-  box-shadow: 0 0 10px rgba(166, 255, 38, 0.15);
+  box-shadow: 0 0 10px rgba(166, 255, 38, 0.12);
 }
 
 .quota-pill.capped {
@@ -443,17 +443,18 @@ body {
   font-size: 0.52rem;
   color: var(--accent-lime);
   background: rgba(166, 255, 38, 0.12);
-  border: 2px solid var(--accent-lime);
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-weight: 700;
+  border: 1px solid rgba(166, 255, 38, 0.3);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 3.5px;
+  gap: 3px;
   line-height: 1.2;
-  box-shadow: 0 0 6px rgba(166, 255, 38, 0.2);
+}
+
 .session-status::before {
   content: "";
   display: inline-block;
@@ -578,7 +579,7 @@ body {
 
 .email-pill {
   background: rgba(166, 255, 38, 0.08);
-  border: 2px solid var(--accent-lime);
+  border: 1px solid rgba(166, 255, 38, 0.25);
   color: var(--accent-lime);
 }
 
@@ -817,7 +818,7 @@ body {
 
 .tag-pill, .active-tag-pill {
   background: rgba(166, 255, 38, 0.16);
-  border: 2px solid var(--accent-lime);
+  border: 1px solid rgba(166, 255, 38, 0.45);
   color: var(--accent-lime);
   padding: 5px 10px;
   min-height: 28px;
@@ -827,7 +828,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  box-shadow: 0 0 8px rgba(166, 255, 38, 0.18);
+  box-shadow: 0 0 8px rgba(166, 255, 38, 0.12);
 }
 
 .tag-dot {
@@ -877,19 +878,19 @@ body {
 }
 
 .tag-input-field:focus {
-  border: 2px solid var(--accent-lime);
+  border-color: var(--accent-lime);
   box-shadow: 0 0 0 2px rgba(166, 255, 38, 0.2);
 }
 
 .tag-add-button {
   height: 26px;
-  background: rgba(166, 255, 38, 0.14);
-  border: 2px solid var(--accent-lime);
+  background: rgba(166, 255, 38, 0.12);
+  border: 1px solid rgba(166, 255, 38, 0.35);
   color: var(--accent-lime);
   border-radius: var(--radius-xs);
   padding: 0 10px;
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -897,8 +898,8 @@ body {
 .tag-add-button:hover {
   background: var(--accent-lime);
   color: #080C14;
-  font-weight: 800;
-  box-shadow: 0 0 10px rgba(166, 255, 38, 0.35);
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(166, 255, 38, 0.3);
 }
 
 .limit-alert-banner {
@@ -942,15 +943,15 @@ body {
 
 .quick-tag-btn:hover {
   background: rgba(166, 255, 38, 0.08);
-  border: 2px solid rgba(166, 255, 38, 0.65);
+  border-color: rgba(166, 255, 38, 0.4);
   color: #F8FAFC;
 }
 
 .quick-tag-btn.active {
   background: rgba(166, 255, 38, 0.2);
-  border: 2px solid var(--accent-lime);
+  border: 1px solid rgba(166, 255, 38, 0.65);
   color: var(--accent-lime);
-  box-shadow: 0 0 10px rgba(166, 255, 38, 0.25);
+  box-shadow: 0 0 10px rgba(166, 255, 38, 0.2);
 }
 
 .quick-tag-delete {
