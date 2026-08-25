@@ -503,33 +503,7 @@ async function handlePipelineSync(profileData, googleAuthToken, creemLicenseKey)
     }
   }
 
-  // 3. Central Backend Server Relay (Optional custom server)
-  try {
-    const { backend_server_url } = await chrome.storage.local.get("backend_server_url");
-    if (backend_server_url && !backend_server_url.includes("temporary-instant") && !backend_server_url.includes("PLACEHOLDER")) {
-      const res = await fetch(`${backend_server_url}/api/sync/profile`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          authToken: googleAuthToken,
-          licenseKey: creemLicenseKey || "",
-          data: profileData
-        })
-      });
-
-      if (res.ok) {
-        const result = await res.json();
-        await recordSyncSuccess();
-        return result;
-      }
-    }
-  } catch (serverErr) {
-    console.warn("[TagSilo Background] Backend server relay note:", serverErr.message);
-  }
-
-  // 4. Direct Google Sheets API Anti-Duplicate Execution
+  // 3. Direct Google Sheets API Anti-Duplicate Execution
   const directResult = await executeDirectGoogleSheetsSync(googleAuthToken, profileData);
   await recordSyncSuccess();
   return directResult;

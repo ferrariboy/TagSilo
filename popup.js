@@ -282,14 +282,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       rawTags = [];
     }
 
-    quickTags = (rawTags || []).map(cleanTag).filter(Boolean);
+    let isGroupsInitialized = syncData.pipeline_groups_initialized || localData.pipeline_groups_initialized;
+    let rawGroups = (syncData.pipeline_groups !== undefined) ? syncData.pipeline_groups :
+                    (syncData.tagsilo_groups !== undefined) ? syncData.tagsilo_groups :
+                    (localData.pipeline_groups !== undefined) ? localData.pipeline_groups :
+                    (localData.tagsilo_groups !== undefined) ? localData.tagsilo_groups : null;
 
-    let rawGroups = syncData.pipeline_groups || syncData.tagsilo_groups || localData.pipeline_groups || localData.tagsilo_groups;
-    if (!Array.isArray(rawGroups) || rawGroups.length === 0) {
+    if (!Array.isArray(rawGroups) && !isGroupsInitialized) {
       rawGroups = DEFAULT_GROUPS;
       try {
-        await chrome.storage.local.set({ pipeline_groups: DEFAULT_GROUPS, tagsilo_groups: DEFAULT_GROUPS });
+        await chrome.storage.local.set({ pipeline_groups: DEFAULT_GROUPS, tagsilo_groups: DEFAULT_GROUPS, pipeline_groups_initialized: true });
+        await chrome.storage.sync.set({ pipeline_groups: DEFAULT_GROUPS, tagsilo_groups: DEFAULT_GROUPS, pipeline_groups_initialized: true });
       } catch (e) {}
+    } else if (!Array.isArray(rawGroups)) {
+      rawGroups = [];
     }
     pipelineGroups = rawGroups;
 
@@ -1334,32 +1340,30 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      // 2. Ensure Google Auth Token is active FIRST (prompt user to connect if unauthenticated)
-      if (!currentAuthToken || !currentGoogleUser) {
-        let silentAuthSuccess = false;
-        try {
-          const silent = await authenticateWithGoogle(false);
-          if (silent && silent.token) {
-            currentAuthToken = silent.token;
-            renderAuthenticatedUser(silent.user, silent.token);
-            silentAuthSuccess = true;
-          }
-        } catch (e) {}
+      // 2. Ensure Google Auth Token is active
+      if (!currentAuthToken) {
+        const storedTokens = await chrome.storage.local.get(["tagsilo_google_access_token", "tagsilo_google_user"]);
+        if (storedTokens.tagsilo_google_access_token) {
+          currentAuthToken = storedTokens.tagsilo_google_access_token;
+        }
+        if (storedTokens.tagsilo_google_user) {
+          currentGoogleUser = storedTokens.tagsilo_google_user;
+        }
+      }
 
-        if (!silentAuthSuccess) {
-          const confirmSignIn = confirm("Google Workspace is not connected.\n\nConnect your Google account now to synchronize leads directly to your Google Sheets spreadsheet?");
-          if (!confirmSignIn) {
-            return;
-          }
-          try {
-            const authRes = await authenticateWithGoogle(true);
-            currentAuthToken = authRes.token;
-            renderAuthenticatedUser(authRes.user, authRes.token);
-            await queryUserProfileStatus();
-          } catch (authErr) {
-            alert("Google Sign-In failed or was cancelled: " + authErr.message);
-            return;
-          }
+      if (!currentGoogleUser) {
+        const confirmSignIn = confirm("Google Workspace is not connected.\n\nConnect your Google account now to synchronize leads directly to your Google Sheets spreadsheet?");
+        if (!confirmSignIn) {
+          return;
+        }
+        try {
+          const authRes = await authenticateWithGoogle(true);
+          currentAuthToken = authRes.token;
+          renderAuthenticatedUser(authRes.user, authRes.token);
+          await queryUserProfileStatus();
+        } catch (authErr) {
+          alert("Google Sign-In failed or was cancelled: " + authErr.message);
+          return;
         }
       }
 
@@ -1413,7 +1417,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         creemLicenseKey: stored.creem_license_key || ""
       });
 
-      // 5. If Token Expired or Invalid, Auto-Refresh Google Token Silently and Retry
+      // 5. If Token Expired, Auto-Refresh Google Token Silently and Retry Once
       const isAuthError = response && !response.success && response.error && (
         response.error.toLowerCase().includes("authentication credential") ||
         response.error.toLowerCase().includes("oauth") ||
@@ -1425,29 +1429,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (isAuthError) {
         console.warn("[TagSilo Pro] Expired Google OAuth token detected. Refreshing token silently...");
         try {
-          if (currentAuthToken) {
-            await new Promise((r) => chrome.identity.removeCachedAuthToken({ token: currentAuthToken }, r));
-          }
-          let refreshed = null;
-          try {
-            refreshed = await authenticateWithGoogle(false);
-          } catch (e) {
-            refreshed = await authenticateWithGoogle(true);
-          }
-
-          if (refreshed && refreshed.token) {
-            currentAuthToken = refreshed.token;
-            renderAuthenticatedUser(refreshed.user, refreshed.token);
+          const refreshedToken = await refreshGoogleAccessToken();
+          if (refreshedToken) {
+            currentAuthToken = refreshedToken;
+            if (currentGoogleUser) renderAuthenticatedUser(currentGoogleUser, refreshedToken);
 
             response = await chrome.runtime.sendMessage({
               action: "EXECUTE_SYNC",
               profileData: profileData,
-              googleAuthToken: refreshed.token,
+              googleAuthToken: refreshedToken,
               creemLicenseKey: stored.creem_license_key || ""
             });
           }
         } catch (reAuthErr) {
-          console.error("[TagSilo Pro] Re-auth retry error:", reAuthErr);
+          console.warn("[TagSilo Pro] Silent token refresh retry notice:", reAuthErr);
         }
       }
 

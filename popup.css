@@ -180,7 +180,10 @@ body {
   color: var(--accent-cyan);
   background: var(--accent-cyan-dim);
   border: 1px solid rgba(56, 189, 248, 0.25);
-  padding: 2.5px 5px;
+  padding: 3.5px 7px;
+  min-height: 20px;
+  display: inline-flex;
+  align-items: center;
   border-radius: var(--radius-xs);
   letter-spacing: 0.3px;
   line-height: 1.2;
@@ -189,7 +192,10 @@ body {
 .tier-badge {
   font-size: 0.55rem;
   font-weight: 800;
-  padding: 2.5px 6px;
+  padding: 4px 8px;
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
   border-radius: 3px;
   letter-spacing: 0.4px;
   text-transform: uppercase;
@@ -220,7 +226,8 @@ body {
   gap: 4px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-outer);
-  padding: 3px 7px;
+  padding: 4.5px 9px;
+  min-height: 24px;
   border-radius: var(--radius-pill);
   font-size: 0.60rem;
   font-weight: 600;
@@ -425,16 +432,18 @@ body {
 }
 
 .lead-avatar-wrap {
-  width: 48px;
-  height: 48px;
+  width: 62px;
+  height: 62px;
+  min-width: 62px;
+  min-height: 62px;
   flex-shrink: 0;
 }
 
 .lead-avatar-img {
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  min-height: 48px;
+  width: 62px;
+  height: 62px;
+  min-width: 62px;
+  min-height: 62px;
   border-radius: 50%;
   border: 1.5px solid rgba(56, 189, 248, 0.4);
   background: var(--surface-inner);
@@ -443,17 +452,17 @@ body {
 }
 
 .lead-avatar-fallback {
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  min-height: 48px;
+  width: 62px;
+  height: 62px;
+  min-width: 62px;
+  min-height: 62px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--accent-cyan-dim);
   color: var(--accent-cyan);
   font-weight: 800;
-  font-size: 18px;
+  font-size: 22px;
   border: 1.5px solid rgba(56, 189, 248, 0.4);
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.18);
 }
@@ -501,22 +510,22 @@ body {
 .meta-pills-row {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   margin-top: 4px;
 }
 
 .meta-pill {
-  font-size: 0.50rem;
+  font-size: 0.52rem;
   font-weight: 500;
-  padding: 4px 8px;
-  min-height: 22px;
+  padding: 5px 10px;
+  min-height: 28px;
   border-radius: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   line-height: 1.2;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
@@ -547,7 +556,8 @@ body {
   font-weight: 600;
   color: var(--accent-cyan);
   background: var(--accent-cyan-dim);
-  padding: 2.5px 6px;
+  padding: 4px 8px;
+  min-height: 22px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(56, 189, 248, 0.2);
 }
@@ -648,11 +658,11 @@ body {
   background: var(--surface-inner);
   border: 1px dashed rgba(166, 255, 38, 0.3);
   border-radius: var(--radius-xs);
-  min-height: 26px;
-  padding: 3px 5px;
+  min-height: 32px;
+  padding: 4px 6px;
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 5px;
   align-items: center;
 }
 
@@ -660,14 +670,14 @@ body {
   background: rgba(166, 255, 38, 0.16);
   border: 1px solid rgba(166, 255, 38, 0.45);
   color: var(--accent-lime);
-  padding: 3.5px 8px;
-  min-height: 22px;
+  padding: 5px 10px;
+  min-height: 28px;
   border-radius: var(--radius-pill);
   font-size: 0.64rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   box-shadow: 0 0 8px rgba(166, 255, 38, 0.12);
 }
 
@@ -707,11 +717,11 @@ body {
 
 .tag-input-field {
   flex: 1;
-  height: 24px;
+  height: 26px;
   background: var(--surface-inner);
   border: 1px solid var(--border-outer);
   border-radius: var(--radius-xs);
-  padding: 3px 6px;
+  padding: 4px 7px;
   color: var(--text-primary);
   font-size: 0.65rem;
   outline: none;
@@ -723,12 +733,12 @@ body {
 }
 
 .tag-add-button {
-  height: 24px;
+  height: 26px;
   background: rgba(166, 255, 38, 0.12);
   border: 1px solid rgba(166, 255, 38, 0.35);
   color: var(--accent-lime);
   border-radius: var(--radius-xs);
-  padding: 0 8px;
+  padding: 0 10px;
   font-size: 0.65rem;
   font-weight: 600;
   cursor: pointer;
@@ -761,22 +771,22 @@ body {
 .presets-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 5px;
 }
 
 .quick-tag-btn {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
-  padding: 3.5px 8px 3.5px 9px;
-  min-height: 22px;
+  padding: 5px 10px;
+  min-height: 28px;
   border-radius: var(--radius-pill);
   font-size: 0.64rem;
   font-weight: 500;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   transition: all 0.15s ease;
   user-select: none;
 }
