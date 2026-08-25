@@ -100,8 +100,8 @@
         </div>
 
         <div class="meta-pills-row">
-          <div id="profileUrlBadge" class="meta-pill url-pill" title="LinkedIn Profile URL">https://linkedin.com</div>
-          <div id="profileEmailBadge" class="meta-pill email-pill" title="Lead Contact Email">Email: Searching...</div>
+          <div id="profileUrlBadge" class="meta-pill url-pill">https://linkedin.com</div>
+          <div id="profileEmailBadge" class="meta-pill email-pill">Email: Searching...</div>
         </div>
 
         <div id="alreadyTaggedBanner" class="record-found-banner">
@@ -136,20 +136,17 @@
         </select>
       </section>
 
-      <!-- 4. Consolidated Smart Tag Taxonomy Studio -->
+      <!-- 4. Profile Tags Taxonomy -->
       <section class="surface-card">
         <div class="surface-header">
           <span class="section-label">Profile Tags (<span id="activeCountLabel">0</span>)</span>
           <span id="tagLimitCounter" class="tag-counter-label">0 of 2 Applied</span>
         </div>
         <div id="activeTagsBox" class="active-tags-surface">
-          <span class="empty-tags-hint">No tags applied — click presets below</span>
-        </div>
-        <div id="quickTagsGrid" class="presets-grid">
-          <!-- Dynamically populated preset buttons -->
+          <span class="empty-tags-hint">No tags applied — select presets below</span>
         </div>
         <div class="custom-tag-row">
-          <input type="text" id="customActiveTagInput" class="tag-input-field" placeholder="Add custom preset tag..." autocomplete="off">
+          <input type="text" id="customActiveTagInput" class="tag-input-field" placeholder="Add custom tag..." autocomplete="off">
           <button id="addActiveTagBtn" class="tag-add-button" type="button">+ Add</button>
         </div>
         <div id="inlineTagLimitBanner" class="limit-alert-banner">
@@ -157,7 +154,17 @@
         </div>
       </section>
 
-      <!-- 5. Enrichment Notes & Context -->
+      <!-- 5. Preset Quick Tags Grid -->
+      <section class="surface-card">
+        <div class="surface-header">
+          <span class="section-label">Quick Presets</span>
+        </div>
+        <div id="quickTagsGrid" class="presets-grid">
+          <!-- Dynamically populated from settings -->
+        </div>
+      </section>
+
+      <!-- 6. Enrichment Notes & Context -->
       <section class="surface-card">
         <div class="surface-header">
           <span class="section-label">Enrichment Notes</span>
