@@ -1604,7 +1604,66 @@ async function extractLinkedInMetadataInPage() {
   let email = "";
 
   // -------------------------------------------------------------
-  // LAYER 1: HEADLINE & NAME EXTRACTION (DOM & VISUAL HIERARCHY)
+  // STEP 1: AVATAR IMAGE EXTRACTION (FROM MAIN PROFILE TOP CARD FIRST)
+  // Scraped immediately from main profile DOM before touching any modal.
+  // -------------------------------------------------------------
+  try {
+    // A. Meta tags in main page head
+    const ogImg = document.querySelector('meta[property="og:image"]')?.getAttribute("content") ||
+                  document.querySelector('meta[name="image"]')?.getAttribute("content") ||
+                  document.querySelector('meta[name="twitter:image"]')?.getAttribute("content");
+    if (ogImg && !ogImg.includes("static.licdn.com/aero-v1/sc/h/") && !ogImg.includes("ghost") && !ogImg.includes("data:image")) {
+      image = ogImg;
+    }
+
+    // B. Direct top-card profile image element selectors on main profile page
+    if (!image) {
+      const isModal = (el) => el.closest(".artdeco-modal") || el.closest("#pv-contact-info") || el.closest(".pv-contact-info") || el.closest("dialog") || el.closest("#global-nav");
+      
+      const topImg = document.querySelector("img.pv-top-card-profile-picture__image") ||
+                     document.querySelector("img.pv-top-card-profile-picture__image--show") ||
+                     document.querySelector("button.pv-top-card-profile-picture img") ||
+                     document.querySelector("button[aria-label*='profile picture' i] img") ||
+                     document.querySelector("button[aria-label*='photo' i] img") ||
+                     document.querySelector("img.profile-photo-edit__preview") ||
+                     document.querySelector("img.pv-top-card__photo") ||
+                     document.querySelector("img.EntityPhoto-profile-3") ||
+                     document.querySelector("img.EntityPhoto-profile-4") ||
+                     document.querySelector("img.presence-entity__image") ||
+                     document.querySelector(".pv-top-card__non-self-photo-wrapper img") ||
+                     document.querySelector(".top-card-layout__entity-image") ||
+                     document.querySelector("img[alt*='profile' i]") ||
+                     document.querySelector("img[alt*='photo' i]");
+
+      if (topImg && !isModal(topImg)) {
+        const srcVal = topImg.src || topImg.getAttribute("data-delayed-url") || topImg.getAttribute("data-src") || "";
+        if (srcVal && !srcVal.startsWith("data:image/svg") && !srcVal.includes("ghost") && !srcVal.includes("static.licdn.com/aero-v1/sc/h/")) {
+          image = srcVal;
+        }
+      }
+
+      // C. Fallback: Search any image inside the main top-card
+      if (!image) {
+        const mainCard = document.querySelector("main section.artdeco-card, .pv-top-card, .ph5, .top-card-layout");
+        if (mainCard) {
+          const imgs = mainCard.querySelectorAll("img");
+          for (const imgEl of imgs) {
+            if (isModal(imgEl)) continue;
+            const srcVal = imgEl.src || imgEl.getAttribute("data-delayed-url") || imgEl.getAttribute("data-src") || "";
+            if (srcVal && (srcVal.includes("media.licdn.com/dms/image/") || srcVal.includes("profile-displayphoto")) && !srcVal.includes("ghost")) {
+              image = srcVal;
+              break;
+            }
+          }
+        }
+      }
+    }
+  } catch (imgErr) {
+    console.warn("[TagSilo] Main page avatar extraction note:", imgErr);
+  }
+
+  // -------------------------------------------------------------
+  // STEP 2: HEADLINE & NAME EXTRACTION (DOM & VISUAL HIERARCHY)
   // -------------------------------------------------------------
   try {
     const nameEl = document.querySelector("h1.text-heading-xlarge") ||
@@ -1617,7 +1676,7 @@ async function extractLinkedInMetadataInPage() {
       name = (nameEl.innerText || nameEl.textContent || "").trim();
     }
 
-    // 1A. Visual Hierarchy Scan from nameEl
+    // Visual Hierarchy Scan from nameEl
     if (nameEl) {
       const card = nameEl.closest(".pv-text-details__left-panel") ||
                    nameEl.closest("section.artdeco-card") ||
@@ -1634,7 +1693,7 @@ async function extractLinkedInMetadataInPage() {
         if (!txt || txt.length < 8) continue;
         if (name && txt.toLowerCase() === name.toLowerCase()) continue;
         if (txt.toLowerCase().includes("contact info") || txt.toLowerCase().includes("mutual connection") || txt.toLowerCase().includes("follower")) continue;
-        if (/^\([a-z\/\s]+\)$/i.test(txt)) continue; // (She/Her)
+        if (/^\([a-z\/\s]+\)$/i.test(txt)) continue;
         if (/^(1st|2nd|3rd|verified|premium)$/i.test(txt)) continue;
 
         title = txt;
@@ -1642,7 +1701,7 @@ async function extractLinkedInMetadataInPage() {
       }
     }
 
-    // 1B. Direct Selectors
+    // Direct Selectors
     if (!title) {
       const headlineSelectors = [
         ".pv-text-details__left-panel div.text-body-medium",
@@ -1839,60 +1898,7 @@ async function extractLinkedInMetadataInPage() {
     } catch (e) {}
   }
 
-  // -------------------------------------------------------------
-  // LAYER 5: AVATAR IMAGE EXTRACTION (FROM MAIN PROFILE TOP CARD ONLY)
-  // Strictly excludes modals, overlays, contact-info popups, global nav, and dialogs.
-  // -------------------------------------------------------------
-  try {
-    const isModalOrNav = (el) => {
-      if (!el) return true;
-      if (el.closest(".artdeco-modal") || el.closest("#pv-contact-info") || el.closest(".pv-contact-info") || el.closest("dialog") || el.closest("#global-nav") || el.closest("nav") || el.closest("header") || el.closest("footer")) return true;
-      return false;
-    };
 
-    // A. Meta tag from main page HTML head
-    if (!image) {
-      const ogImg = document.querySelector('meta[property="og:image"]')?.getAttribute("content") ||
-                    document.querySelector('meta[name="image"]')?.getAttribute("content") ||
-                    document.querySelector('meta[name="twitter:image"]')?.getAttribute("content");
-      if (ogImg && !ogImg.includes("static.licdn.com/aero-v1/sc/h/") && !ogImg.includes("ghost") && !ogImg.includes("data:image")) {
-        image = ogImg;
-      }
-    }
-
-    // B. Target top-card profile photo elements on the main page
-    if (!image) {
-      const sel = "img.pv-top-card-profile-picture__image, img.pv-top-card-profile-picture__image--show, button.pv-top-card-profile-picture img, button[aria-label*='profile picture' i] img, button[aria-label*='photo' i] img, img.profile-photo-edit__preview, img.pv-top-card__photo, img.EntityPhoto-profile-3, img.EntityPhoto-profile-4, img.presence-entity__image, .pv-top-card__non-self-photo-wrapper img, .top-card-layout__entity-image, .pv-top-card--photo img, img[class*='pv-top-card'], img[class*='profile-photo'], img[class*='profile-picture']";
-      const candidates = document.querySelectorAll(sel);
-
-      for (const el of candidates) {
-        if (isModalOrNav(el)) continue;
-        const srcVal = el.src || el.getAttribute("data-delayed-url") || el.getAttribute("data-src") || "";
-        if (srcVal && !srcVal.startsWith("data:image/svg") && !srcVal.includes("ghost") && !srcVal.includes("static.licdn.com/aero-v1/sc/h/")) {
-          image = srcVal;
-          break;
-        }
-      }
-    }
-
-    // C. Fallback: Search inside main top-card section only
-    if (!image) {
-      const topSection = document.querySelector("main section.artdeco-card, .pv-top-card, .ph5, .top-card-layout");
-      if (topSection) {
-        const imgs = topSection.querySelectorAll("img");
-        for (const img of imgs) {
-          if (isModalOrNav(img)) continue;
-          const src = img.src || img.getAttribute("data-delayed-url") || "";
-          if (src && (src.includes("media.licdn.com/dms/image/") || src.includes("profile-displayphoto")) && !src.includes("ghost")) {
-            image = src;
-            break;
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.warn("[TagSilo] Avatar extraction note:", e);
-  }
 
   // -------------------------------------------------------------
   // LAYER 6: EMAIL EXTRACTION (SAFE & ISOLATED)
