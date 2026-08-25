@@ -396,15 +396,16 @@ body {
 .user-session-row {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
 }
 
 .session-avatar {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   border: 1.5px solid var(--accent-cyan);
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .avatar-fallback {
@@ -415,28 +416,51 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .session-meta {
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   overflow: hidden;
+  min-width: 0;
 }
 
 .session-email {
-  font-size: 0.7rem;
+  font-size: 0.64rem;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: block;
 }
 
 .session-status {
-  font-size: 0.6rem;
-  color: var(--accent-cyan);
-  font-weight: 500;
-  display: block;
+  font-size: 0.52rem;
+  color: var(--accent-lime);
+  background: rgba(166, 255, 38, 0.12);
+  border: 1px solid rgba(166, 255, 38, 0.3);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 1.2;
+}
+
+.session-status::before {
+  content: "";
+  display: inline-block;
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: var(--accent-lime);
+  box-shadow: 0 0 4px var(--accent-lime);
 }
 
 /* 2. Lead Profile Surface */
