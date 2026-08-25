@@ -716,10 +716,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 5. Pipeline Group Management & Dropdown Renderer
   function renderPipelineGroups() {
-    groupSelect.innerHTML = '<option value="">Select target pipeline...</option>';
+    groupSelect.innerHTML = '<option value="" style="font-size: 0.52rem; background: #0F172A; color: #F8FAFC;">Select target pipeline...</option>';
     pipelineGroups.forEach((groupName, idx) => {
       const option = document.createElement("option");
       option.value = groupName;
+      option.style.fontSize = "0.52rem";
+      option.style.backgroundColor = "#0F172A";
+      option.style.color = "#F8FAFC";
 
       if (!isProUser && idx > 0) {
         option.textContent = `🔒 ${groupName} (Pro)`;
@@ -1837,26 +1840,33 @@ async function extractLinkedInMetadataInPage() {
   }
 
   // -------------------------------------------------------------
-  // LAYER 5: AVATAR IMAGE EXTRACTION (Ultra Comprehensive)
+  // LAYER 5: AVATAR IMAGE EXTRACTION (FROM MAIN PROFILE TOP CARD ONLY)
+  // Strictly excludes modals, overlays, contact-info popups, global nav, and dialogs.
   // -------------------------------------------------------------
   try {
-    // 1. Check meta tags
+    const isModalOrNav = (el) => {
+      if (!el) return true;
+      if (el.closest(".artdeco-modal") || el.closest("#pv-contact-info") || el.closest(".pv-contact-info") || el.closest("dialog") || el.closest("#global-nav") || el.closest("nav") || el.closest("header") || el.closest("footer")) return true;
+      return false;
+    };
+
+    // A. Meta tag from main page HTML head
     if (!image) {
       const ogImg = document.querySelector('meta[property="og:image"]')?.getAttribute("content") ||
                     document.querySelector('meta[name="image"]')?.getAttribute("content") ||
                     document.querySelector('meta[name="twitter:image"]')?.getAttribute("content");
-      if (ogImg && !ogImg.includes("static.licdn.com/aero-v1/sc/h/") && !ogImg.includes("ghost")) {
+      if (ogImg && !ogImg.includes("static.licdn.com/aero-v1/sc/h/") && !ogImg.includes("ghost") && !ogImg.includes("data:image")) {
         image = ogImg;
       }
     }
 
-    // 2. Query all known LinkedIn profile picture selectors
+    // B. Target top-card profile photo elements on the main page
     if (!image) {
       const sel = "img.pv-top-card-profile-picture__image, img.pv-top-card-profile-picture__image--show, button.pv-top-card-profile-picture img, button[aria-label*='profile picture' i] img, button[aria-label*='photo' i] img, img.profile-photo-edit__preview, img.pv-top-card__photo, img.EntityPhoto-profile-3, img.EntityPhoto-profile-4, img.presence-entity__image, .pv-top-card__non-self-photo-wrapper img, .top-card-layout__entity-image, .pv-top-card--photo img, img[class*='pv-top-card'], img[class*='profile-photo'], img[class*='profile-picture']";
       const candidates = document.querySelectorAll(sel);
 
       for (const el of candidates) {
-        if (el.closest("#global-nav") || el.closest("nav") || el.closest("header") || el.closest("footer")) continue;
+        if (isModalOrNav(el)) continue;
         const srcVal = el.src || el.getAttribute("data-delayed-url") || el.getAttribute("data-src") || "";
         if (srcVal && !srcVal.startsWith("data:image/svg") && !srcVal.includes("ghost") && !srcVal.includes("static.licdn.com/aero-v1/sc/h/")) {
           image = srcVal;
@@ -1865,15 +1875,18 @@ async function extractLinkedInMetadataInPage() {
       }
     }
 
-    // 3. Fallback: Query any licdn media image inside main top-card
+    // C. Fallback: Search inside main top-card section only
     if (!image) {
-      const mainImgs = document.querySelectorAll("main img, section.artdeco-card img, div.ph5 img, div.pv-top-card img");
-      for (const img of mainImgs) {
-        if (img.closest("#global-nav") || img.closest("nav") || img.closest("header") || img.closest("footer")) continue;
-        const src = img.src || img.getAttribute("data-delayed-url") || "";
-        if ((src.includes("media.licdn.com/dms/image/") || src.includes("profile-displayphoto")) && !src.includes("ghost")) {
-          image = src;
-          break;
+      const topSection = document.querySelector("main section.artdeco-card, .pv-top-card, .ph5, .top-card-layout");
+      if (topSection) {
+        const imgs = topSection.querySelectorAll("img");
+        for (const img of imgs) {
+          if (isModalOrNav(img)) continue;
+          const src = img.src || img.getAttribute("data-delayed-url") || "";
+          if (src && (src.includes("media.licdn.com/dms/image/") || src.includes("profile-displayphoto")) && !src.includes("ghost")) {
+            image = src;
+            break;
+          }
         }
       }
     }

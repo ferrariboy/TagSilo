@@ -216,22 +216,33 @@ async function extractProfileDetails() {
   const headline = extractHeadline(name) || '';
 
   let image = '';
-  const ogImg = document.querySelector('meta[property="og:image"]')?.getAttribute('content') ||
-                document.querySelector('meta[name="image"]')?.getAttribute('content');
-  if (ogImg && !ogImg.includes('static.licdn.com/aero-v1/sc/h/')) image = ogImg;
+  try {
+    const isModalOrNav = (el) => {
+      if (!el) return true;
+      if (el.closest('.artdeco-modal') || el.closest('#pv-contact-info') || el.closest('.pv-contact-info') || el.closest('dialog') || el.closest('#global-nav') || el.closest('nav') || el.closest('header') || el.closest('footer')) return true;
+      return false;
+    };
 
-  if (!image) {
-    const imgEl = document.querySelector('img.pv-top-card-profile-picture__image') ||
-                  document.querySelector('img.profile-photo-edit__preview') ||
-                  document.querySelector('img.pv-top-card__photo') ||
-                  document.querySelector('img.EntityPhoto-profile-3') ||
-                  document.querySelector('img.EntityPhoto-profile-4') ||
-                  document.querySelector('.top-card-layout__entity-image') ||
-                  document.querySelector('img[alt*="profile" i]');
-    if (imgEl && imgEl.src && !imgEl.src.startsWith('data:image/svg')) {
-      image = imgEl.src;
+    const ogImg = document.querySelector('meta[property="og:image"]')?.getAttribute('content') ||
+                  document.querySelector('meta[name="image"]')?.getAttribute('content') ||
+                  document.querySelector('meta[name="twitter:image"]')?.getAttribute('content');
+    if (ogImg && !ogImg.includes('static.licdn.com/aero-v1/sc/h/') && !ogImg.includes('ghost') && !ogImg.includes('data:image')) {
+      image = ogImg;
     }
-  }
+
+    if (!image) {
+      const sel = "img.pv-top-card-profile-picture__image, img.pv-top-card-profile-picture__image--show, button.pv-top-card-profile-picture img, button[aria-label*='profile picture' i] img, button[aria-label*='photo' i] img, img.profile-photo-edit__preview, img.pv-top-card__photo, img.EntityPhoto-profile-3, img.EntityPhoto-profile-4, img.presence-entity__image, .pv-top-card__non-self-photo-wrapper img, .top-card-layout__entity-image, .pv-top-card--photo img, img[class*='pv-top-card'], img[class*='profile-photo'], img[class*='profile-picture']";
+      const candidates = document.querySelectorAll(sel);
+      for (const el of candidates) {
+        if (isModalOrNav(el)) continue;
+        const srcVal = el.src || el.getAttribute('data-delayed-url') || el.getAttribute('data-src') || '';
+        if (srcVal && !srcVal.startsWith('data:image/svg') && !srcVal.includes('ghost') && !srcVal.includes('static.licdn.com/aero-v1/sc/h/')) {
+          image = srcVal;
+          break;
+        }
+      }
+    }
+  } catch (e) {}
 
   const email = await extractEmail();
 

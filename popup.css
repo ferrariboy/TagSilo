@@ -599,7 +599,8 @@ body {
 }
 
 /* 3. Pipeline Group Select */
-.studio-select {
+.studio-select,
+#groupSelect {
   width: 100%;
   height: 32px;
   min-height: 32px;
@@ -608,8 +609,8 @@ body {
   border-radius: var(--radius-xs);
   padding: 5px 28px 5px 8px;
   color: var(--text-primary);
-  font-family: inherit;
-  font-size: 0.52rem;
+  font-family: var(--font-sans) !important;
+  font-size: 0.52rem !important;
   line-height: 1.4;
   outline: none;
   cursor: pointer;
@@ -622,15 +623,18 @@ body {
   transition: border-color 0.15s ease;
 }
 
-.studio-select:focus {
+.studio-select:focus,
+#groupSelect:focus {
   border-color: var(--accent-lime);
   box-shadow: 0 0 0 2px rgba(166, 255, 38, 0.2);
 }
 
-.studio-select option {
-  background: #0F172A;
-  color: #F8FAFC;
-  font-size: 0.52rem;
+.studio-select option,
+#groupSelect option {
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.52rem !important;
   padding: 6px 8px;
 }
 
