@@ -1,8 +1,5 @@
 /* TagSilo Pro - Studio-Grade B2B Design System (v1.2.0) */
 :root {
-  /* Master Uniform Scale: Change to 1.0 to revert to 100%, or 0.70 for -30% compact scale */
-  --ui-scale: 0.70;
-
   --bg-deep: #080C14;
   --surface-card: rgba(15, 23, 42, 0.75);
   --surface-inner: rgba(10, 15, 29, 0.70);
@@ -81,10 +78,9 @@ body {
 }
 
 .popup-container {
-  zoom: var(--ui-scale, 0.70);
-  width: calc(380px / var(--ui-scale, 0.70));
-  height: calc(520px / var(--ui-scale, 0.70));
-  max-height: calc(520px / var(--ui-scale, 0.70));
+  width: 380px;
+  height: 520px;
+  max-height: 520px;
   display: flex;
   flex-direction: column;
   padding: 8px 10px;
