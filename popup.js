@@ -804,6 +804,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  const pipelineGroupCard = document.getElementById("pipelineGroupCard");
+
   function toggleCustomDropdown(e) {
     if (e) {
       e.preventDefault();
@@ -816,12 +818,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       customGroupMenu.style.display = "flex";
       if (customGroupTrigger) customGroupTrigger.classList.add("open");
+      if (customGroupDropdownWrap) customGroupDropdownWrap.classList.add("open");
+      if (pipelineGroupCard) pipelineGroupCard.classList.add("open");
     }
   }
 
   function closeCustomDropdown() {
     if (customGroupMenu) customGroupMenu.style.display = "none";
     if (customGroupTrigger) customGroupTrigger.classList.remove("open");
+    if (customGroupDropdownWrap) customGroupDropdownWrap.classList.remove("open");
+    if (pipelineGroupCard) pipelineGroupCard.classList.remove("open");
   }
 
   if (customGroupTrigger) {

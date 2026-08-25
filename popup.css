@@ -624,9 +624,23 @@ body {
 }
 
 /* 3. Pipeline Group Custom Studio Dropdown */
+#pipelineGroupCard {
+  position: relative;
+  z-index: 50;
+}
+
+#pipelineGroupCard.open {
+  z-index: 9999;
+}
+
 .custom-dropdown-wrap {
   position: relative;
   width: 100%;
+  z-index: 50;
+}
+
+.custom-dropdown-wrap.open {
+  z-index: 9999;
 }
 
 .custom-dropdown-trigger {
@@ -638,10 +652,11 @@ body {
   border-radius: var(--radius-xs);
   padding: 5px 10px;
   color: var(--text-primary);
-  font-family: inherit;
-  font-size: 0.52rem;
-  font-weight: 600;
-  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 11px !important;
+  font-size: 0.52rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
   outline: none;
   cursor: pointer;
   display: flex;
@@ -651,10 +666,17 @@ body {
   transition: all 0.15s ease;
 }
 
+#customGroupSelectedText {
+  font-size: 11px !important;
+  font-size: 0.52rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary);
+}
+
 .custom-dropdown-trigger:hover,
 .custom-dropdown-trigger.open {
   border-color: var(--accent-lime);
-  box-shadow: 0 0 0 2px rgba(166, 255, 38, 0.2);
+  box-shadow: 0 0 0 2px rgba(166, 255, 38, 0.25);
 }
 
 .dropdown-chevron {
@@ -673,53 +695,57 @@ body {
   top: calc(100% + 4px);
   left: 0;
   width: 100%;
-  max-height: 160px;
+  max-height: 180px;
   overflow-y: auto;
-  background: #090E17;
-  border: 1px solid rgba(166, 255, 38, 0.4);
+  background: #080D1A !important;
+  border: 1.5px solid rgba(166, 255, 38, 0.6) !important;
   border-radius: var(--radius-xs);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 0 12px rgba(166, 255, 38, 0.15);
-  z-index: 100;
-  padding: 3px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.95), 0 0 16px rgba(166, 255, 38, 0.25) !important;
+  z-index: 999999 !important;
+  padding: 4px;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
 .custom-dropdown-item {
-  font-size: 0.52rem;
-  font-weight: 500;
-  font-family: inherit;
-  color: #F8FAFC;
-  padding: 5px 8px;
-  border-radius: 3px;
+  font-size: 11px !important;
+  font-size: 0.52rem !important;
+  font-weight: 600 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: #F8FAFC !important;
+  padding: 6px 10px !important;
+  min-height: 26px;
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
   transition: all 0.12s ease;
-  line-height: 1.3;
+  line-height: 1.35 !important;
+  user-select: none;
 }
 
 .custom-dropdown-item:hover {
-  background: rgba(166, 255, 38, 0.14);
-  color: var(--accent-lime);
+  background: rgba(166, 255, 38, 0.18) !important;
+  color: var(--accent-lime) !important;
 }
 
 .custom-dropdown-item.selected {
-  background: rgba(166, 255, 38, 0.22);
-  color: var(--accent-lime);
-  font-weight: 700;
+  background: rgba(166, 255, 38, 0.28) !important;
+  color: var(--accent-lime) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 8px rgba(166, 255, 38, 0.2);
 }
 
 .custom-dropdown-item.pro-locked {
-  opacity: 0.8;
-  color: #94A3B8;
+  opacity: 0.75;
+  color: #94A3B8 !important;
 }
 
 .custom-dropdown-item.pro-locked:hover {
-  background: rgba(239, 68, 68, 0.12);
-  color: #FCA5A5;
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #FCA5A5 !important;
 }
 
 .studio-select,
