@@ -139,15 +139,15 @@ async function handleFetchContactEmail(profileUrl) {
 /**
  * Universal Cross-Browser Token Provider & Silent Auto-Renewal Engine
  */
-async function getOrRefreshAuthToken(token) {
+async function getOrRefreshAuthToken(token, forceRefresh = false) {
   let activeToken = token;
-  if (!activeToken) {
+  if (!activeToken && !forceRefresh) {
     const local = await chrome.storage.local.get("tagsilo_google_access_token");
     activeToken = local.tagsilo_google_access_token;
   }
 
-  // 1. Check if token is still valid with Google Userinfo API
-  if (activeToken) {
+  // 1. Check if token is still valid with Google Userinfo API (skip if forceRefresh)
+  if (activeToken && !forceRefresh) {
     try {
       const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
         headers: { Authorization: `Bearer ${activeToken}` }
@@ -156,7 +156,7 @@ async function getOrRefreshAuthToken(token) {
     } catch (e) {}
   }
 
-  // 2. Token expired: perform serverless token refresh
+  // 2. Token expired or force refresh: perform serverless token refresh
   try {
     const { tagsilo_google_refresh_token, tagsilo_google_user } = await chrome.storage.local.get([
       "tagsilo_google_refresh_token",
@@ -551,11 +551,14 @@ async function executeDirectGoogleSheetsSync(token, profileData) {
     if (res.status === 401) {
       console.warn("[TagSilo Background] Received 401 Unauthorized from Google API. Refreshing token silently...");
       try {
-        const refreshedToken = await getOrRefreshAuthToken(null);
+        const refreshedToken = await getOrRefreshAuthToken(null, true);
         if (refreshedToken && refreshedToken !== activeToken) {
           activeToken = refreshedToken;
           options.headers["Authorization"] = `Bearer ${activeToken}`;
           res = await fetch(url, options);
+        } else {
+          // Token expired and cannot be refreshed silently - clear local cache so popup knows to re-authenticate
+          await chrome.storage.local.remove("tagsilo_google_access_token");
         }
       } catch (refreshErr) {
         console.warn("[TagSilo Background] Token refresh retry failed:", refreshErr);

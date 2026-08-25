@@ -1524,22 +1524,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
       if (isAuthError) {
-        console.warn("[TagSilo Pro] Expired Google OAuth token detected. Refreshing token silently...");
+        console.warn("[TagSilo Pro] Expired Google OAuth token detected. Attempting automatic recovery...");
         try {
-          const refreshedToken = await refreshGoogleAccessToken();
-          if (refreshedToken) {
-            currentAuthToken = refreshedToken;
-            if (currentGoogleUser) renderAuthenticatedUser(currentGoogleUser, refreshedToken);
+          let freshToken = await refreshGoogleAccessToken();
+
+          if (!freshToken) {
+            // Prompt 1-click interactive re-authorization to renew the token seamlessly
+            console.log("[TagSilo Pro] Silent token refresh unavailable. Launching Google authorization window...");
+            const authResult = await authenticateWithGoogle(true);
+            freshToken = authResult?.token || null;
+          }
+
+          if (freshToken) {
+            currentAuthToken = freshToken;
+            if (currentGoogleUser) renderAuthenticatedUser(currentGoogleUser, freshToken);
 
             response = await chrome.runtime.sendMessage({
               action: "EXECUTE_SYNC",
               profileData: profileData,
-              googleAuthToken: refreshedToken,
+              googleAuthToken: freshToken,
               creemLicenseKey: stored.creem_license_key || ""
             });
           }
         } catch (reAuthErr) {
-          console.warn("[TagSilo Pro] Silent token refresh retry notice:", reAuthErr);
+          console.warn("[TagSilo Pro] Automatic re-authentication notice:", reAuthErr);
         }
       }
 
