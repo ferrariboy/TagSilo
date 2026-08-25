@@ -457,9 +457,9 @@ body {
 }
 
 .lead-title-field {
-  font-size: 0.64rem;
+  font-size: 0.45rem;
   color: var(--text-secondary);
-  line-height: 1.2;
+  line-height: 1.25;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -476,13 +476,14 @@ body {
 }
 
 .meta-pill {
-  font-size: 0.60rem;
-  padding: 1.5px 5px;
+  font-size: 0.44rem;
+  padding: 1px 4px;
   border-radius: var(--radius-xs);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
+  line-height: 1.2;
 }
 
 .url-pill {
@@ -507,7 +508,7 @@ body {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 0.56rem;
+  font-size: 0.54rem;
   font-weight: 600;
   color: var(--accent-cyan);
   background: var(--accent-cyan-dim);
@@ -537,7 +538,7 @@ body {
 }
 
 .record-found-banner.visible {
-  display: flex;
+  display: flex !important;
 }
 
 .record-found-banner svg {

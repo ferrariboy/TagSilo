@@ -45,15 +45,26 @@ module.exports = async (req, res) => {
 
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
-      const rowRawUrl = (row[2] || "").toString();
-      const rowClean = rowRawUrl
-        .split("?")[0]
-        .split("#")[0]
-        .replace(/^https?:\/\/(www\.)?linkedin\.com/i, "")
-        .replace(/\/$/, "")
-        .toLowerCase();
+      let matched = false;
 
-      if (rowClean && cleanTarget && (rowClean === cleanTarget || cleanTarget.includes(rowClean) || rowClean.includes(cleanTarget))) {
+      for (let c = 0; c < row.length; c++) {
+        const cell = (row[c] || "").toString().trim();
+        if (!cell) continue;
+        const cellClean = cell
+          .split("?")[0]
+          .split("#")[0]
+          .replace(/^https?:\/\/(www\.)?linkedin\.com/i, "")
+          .replace(/\/$/, "")
+          .toLowerCase();
+
+        if (cellClean && cleanTarget && (cellClean === cleanTarget || cleanTarget.includes(cellClean) || cellClean.includes(cleanTarget))) {
+          matched = true;
+          break;
+        }
+      }
+
+      if (matched) {
+        const is8Col = row.length >= 8;
         return res.status(200).json({
           success: true,
           exists: true,
@@ -61,11 +72,12 @@ module.exports = async (req, res) => {
           data: {
             date: row[0] || "",
             name: row[1] || "",
-            url: row[2] || "",
-            email: row[3] || "",
-            group: row[4] || "",
-            tags: row[5] || "",
-            notes: row[6] || ""
+            headline: is8Col ? (row[2] || "") : "",
+            url: is8Col ? (row[3] || "") : (row[2] || ""),
+            email: is8Col ? (row[4] || "") : (row[3] || ""),
+            group: is8Col ? (row[5] || "") : (row[4] || ""),
+            tags: is8Col ? (row[6] || "") : (row[5] || ""),
+            notes: is8Col ? (row[7] || "") : (row[6] || "")
           }
         });
       }

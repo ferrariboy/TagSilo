@@ -245,7 +245,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function loadTaxonomyAndSettings() {
     let syncData = {};
     try {
-      syncData = await chrome.storage.sync.get(["quick_tags", "tagsilo_tags", "pipeline_groups", "tagsilo_groups"]);
+      syncData = await chrome.storage.sync.get(["quick_tags", "tagsilo_tags", "pipeline_groups", "tagsilo_groups", "license_tier", "is_pro", "creem_license_key"]);
     } catch (e) {}
 
     let localData = {};
@@ -257,9 +257,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         "tagsilo_groups",
         "tagsilo_google_user",
         "tagsilo_google_access_token",
-        "creem_license_key"
+        "creem_license_key",
+        "creem_discount_code",
+        "license_tier",
+        "is_pro"
       ]);
     } catch (e) {}
+
+    if (localData.is_pro === true || localData.license_tier === "pro" || syncData.is_pro === true || syncData.license_tier === "pro" || (localData.creem_license_key && localData.creem_license_key.trim() !== "") || (localData.creem_discount_code && localData.creem_discount_code.trim() !== "")) {
+      isProUser = true;
+      licenseTier = "pro";
+    }
 
     let isInitialized = syncData.quick_tags_initialized || localData.quick_tags_initialized;
     let rawTags = syncData.quick_tags || syncData.tagsilo_tags || localData.quick_tags || localData.tagsilo_tags;
@@ -293,10 +301,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 2. Query Vercel GET /api/profile-status (Supabase Database Layer)
   async function queryUserProfileStatus() {
     try {
-      const stored = await chrome.storage.local.get(["creem_license_key", "tagsilo_google_user"]);
+      const stored = await chrome.storage.local.get(["creem_license_key", "tagsilo_google_user", "is_pro", "license_tier"]);
       const userEmail = stored.tagsilo_google_user?.email || currentGoogleUser?.email || "";
       const licenseKey = stored.creem_license_key || "";
       const chromeId = chrome.runtime.id;
+
+      if (stored.is_pro === true || stored.license_tier === "pro" || (licenseKey && licenseKey.trim() !== "")) {
+        isProUser = true;
+        licenseTier = "pro";
+        renderPipelineGroups();
+      }
 
       const params = new URLSearchParams({
         email: userEmail,
@@ -313,9 +327,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           headerTierBadge.textContent = licenseTier.toUpperCase();
           headerTierBadge.className = "tier-badge pro";
           dailyCapIcon.textContent = "👑";
-          dailyCapText.textContent = "PRO UNLIMITED";
-          dailyCapPill.className = "daily-cap-pill";
+          dailyCapText.textContent = "Unlimited Sync";
+          dailyCapPill.className = "quota-pill pro-pill";
           updateTagCounterLabel();
+          renderPipelineGroups();
           return;
         }
       }
@@ -422,7 +437,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // 4. Anti-Duplicate Check in Google Sheets via Backend API & Direct Sheet Fallback
+  // 4. Anti-Duplicate Check in Google Sheets via Background Service Worker & Cloud Sync API
   async function checkDuplicateProfile(profileUrl) {
     if (!profileUrl || !profileUrl.includes("linkedin.com")) return;
 
@@ -433,32 +448,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       ]);
 
       const token = currentAuthToken || tagsilo_google_access_token;
-      if (!token || !active_google_sheet_id) return;
+      if (!token) return;
 
       let response = null;
-      try {
-        const res = await fetch(`${backendApiUrl}/api/sync/check`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            authToken: token,
-            profileUrl: profileUrl,
-            sheetId: active_google_sheet_id
-          })
-        });
-        if (res.ok) {
-          response = await res.json();
-        }
-      } catch (beErr) {
-        console.warn("[TagSilo Pro] Backend check fallback note:", beErr.message);
-      }
 
-      if (!response || !response.exists) {
+      // 1. Direct Background Worker Check (with Google Drive Auto-Discovery)
+      try {
         response = await chrome.runtime.sendMessage({
           action: "CHECK_EXISTING_PROFILE",
           profileUrl: profileUrl,
           googleAuthToken: token
         });
+      } catch (e) {}
+
+      // 2. Fallback to Cloud Backend Check
+      if ((!response || !response.exists) && active_google_sheet_id) {
+        try {
+          const res = await fetch(`${backendApiUrl}/api/sync/check`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              authToken: token,
+              profileUrl: profileUrl,
+              sheetId: active_google_sheet_id
+            })
+          });
+          if (res.ok) {
+            const json = await res.json();
+            if (json && json.exists) response = json;
+          }
+        } catch (beErr) {
+          console.warn("[TagSilo Pro] Backend check note:", beErr.message);
+        }
       }
 
       if (response && response.success && response.exists && response.data) {
@@ -468,6 +489,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Show Already Saved Glass Banner
         if (alreadyTaggedBanner && taggedDateText) {
           taggedDateText.textContent = `Saved on ${rec.date || 'Google Sheet'} in group "${rec.group || 'Prospects'}"`;
+          alreadyTaggedBanner.style.setProperty("display", "flex", "important");
           alreadyTaggedBanner.classList.add("visible");
         }
 
@@ -504,10 +526,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         syncBtnText.textContent = "Update Record in Google Sheets";
+        if (syncBtnIcon) syncBtnIcon.textContent = "✓";
       } else {
         isProfileAlreadySaved = false;
-        if (alreadyTaggedBanner) alreadyTaggedBanner.classList.remove("visible");
+        if (alreadyTaggedBanner) {
+          alreadyTaggedBanner.style.setProperty("display", "none", "important");
+          alreadyTaggedBanner.classList.remove("visible");
+        }
         syncBtnText.textContent = "Sync Profile to Cloud Pipeline";
+        if (syncBtnIcon) syncBtnIcon.textContent = "⚡";
       }
     } catch (err) {
       console.warn("[TagSilo Pro] Duplicate check note:", err);

@@ -128,18 +128,41 @@ async function handleFetchContactEmail(profileUrl) {
 async function checkExistingProfileInSheet(profileUrl, token) {
   if (!profileUrl) return { exists: false };
 
-  const targetUrl = profileUrl.split("?")[0].split("#")[0].replace(/\/$/, "").toLowerCase();
   let authToken = token;
-
   if (!authToken) {
     const localStore = await chrome.storage.local.get("tagsilo_google_access_token");
     authToken = localStore.tagsilo_google_access_token;
   }
-
+  if (!authToken) {
+    try {
+      authToken = await new Promise((resolve) => {
+        chrome.identity.getAuthToken({ interactive: false }, (tok) => resolve(tok || null));
+      });
+    } catch (e) {}
+  }
   if (!authToken) return { exists: false };
 
-  const { active_google_sheet_id } = await chrome.storage.local.get("active_google_sheet_id");
-  if (!active_google_sheet_id) return { exists: false };
+  let { active_google_sheet_id } = await chrome.storage.local.get("active_google_sheet_id");
+  let sheetId = active_google_sheet_id || null;
+
+  // If no sheetId in storage, query Google Drive for TagSilo spreadsheet
+  if (!sheetId) {
+    try {
+      const q = encodeURIComponent(`mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false and (name contains 'TagSilo' or name contains 'Pipeline' or name contains 'Lead')`);
+      const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=10`, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      if (searchRes.ok) {
+        const searchData = await searchRes.json();
+        if (searchData.files && searchData.files.length > 0) {
+          sheetId = searchData.files[0].id;
+          await chrome.storage.local.set({ active_google_sheet_id: sheetId });
+        }
+      }
+    } catch (err) {}
+  }
+
+  if (!sheetId) return { exists: false };
 
   const cleanTarget = (profileUrl || "")
     .split("?")[0]
@@ -149,12 +172,21 @@ async function checkExistingProfileInSheet(profileUrl, token) {
     .toLowerCase();
 
   try {
-    const candidateRanges = ["All_Pipelines!A:G", "Prospects!A:G", "Sheet1!A:G", "A:G"];
+    const candidateRanges = [
+      "All_Pipelines!A:H",
+      "Prospects!A:H",
+      "Sheet1!A:H",
+      "A:H",
+      "All_Pipelines!A:G",
+      "Prospects!A:G",
+      "Sheet1!A:G",
+      "A:G"
+    ];
     let rows = [];
 
     for (const rng of candidateRanges) {
       try {
-        const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${active_google_sheet_id}/values/${encodeURIComponent(rng)}`, {
+        const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(rng)}`, {
           headers: { Authorization: `Bearer ${authToken}` }
         });
         if (res.ok) {
@@ -169,26 +201,39 @@ async function checkExistingProfileInSheet(profileUrl, token) {
 
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
-      const rowRaw = (row[2] || "").toString();
-      const rowClean = rowRaw
-        .split("?")[0]
-        .split("#")[0]
-        .replace(/^https?:\/\/(www\.)?linkedin\.com/i, "")
-        .replace(/\/$/, "")
-        .toLowerCase();
+      let matched = false;
 
-      if (rowClean && cleanTarget && (rowClean === cleanTarget || cleanTarget.includes(rowClean) || rowClean.includes(cleanTarget))) {
+      // Scan all cells in the row for target match
+      for (let c = 0; c < row.length; c++) {
+        const cell = (row[c] || "").toString().trim();
+        if (!cell) continue;
+        const cellClean = cell
+          .split("?")[0]
+          .split("#")[0]
+          .replace(/^https?:\/\/(www\.)?linkedin\.com/i, "")
+          .replace(/\/$/, "")
+          .toLowerCase();
+
+        if (cellClean && cleanTarget && (cellClean === cleanTarget || cleanTarget.includes(cellClean) || cellClean.includes(cleanTarget))) {
+          matched = true;
+          break;
+        }
+      }
+
+      if (matched) {
+        const is8Col = row.length >= 8;
         return {
           exists: true,
           rowIndex: i + 1,
           data: {
             date: row[0] || "",
             name: row[1] || "",
-            url: row[2] || "",
-            email: row[3] || "",
-            group: row[4] || "",
-            tags: row[5] || "",
-            notes: row[6] || ""
+            headline: is8Col ? (row[2] || "") : "",
+            url: is8Col ? (row[3] || "") : (row[2] || ""),
+            email: is8Col ? (row[4] || "") : (row[3] || ""),
+            group: is8Col ? (row[5] || "") : (row[4] || ""),
+            tags: is8Col ? (row[6] || "") : (row[5] || ""),
+            notes: is8Col ? (row[7] || "") : (row[6] || "")
           }
         };
       }
