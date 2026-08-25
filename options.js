@@ -105,14 +105,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let syncData = {};
     try {
-      syncData = await chrome.storage.sync.get(["quick_tags", "tagsilo_tags", "pipeline_groups", "tagsilo_groups", "creem_license_key"]);
+      syncData = await chrome.storage.sync.get([
+        "quick_tags",
+        "tagsilo_tags",
+        "quick_tags_initialized",
+        "pipeline_groups",
+        "tagsilo_groups",
+        "pipeline_groups_initialized",
+        "creem_license_key"
+      ]);
     } catch (e) {}
 
     const localData = await chrome.storage.local.get([
       "quick_tags",
       "tagsilo_tags",
+      "quick_tags_initialized",
       "pipeline_groups",
       "tagsilo_groups",
+      "pipeline_groups_initialized",
       "tagsilo_google_user",
       "tagsilo_google_access_token",
       "creem_license_key",
@@ -136,14 +146,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     await performLicenseCheck(currentKey);
 
     // Tags & Groups
-    const isInitialized = syncData.quick_tags_initialized || localData.quick_tags_initialized;
+    const isTagsInitialized = syncData.quick_tags_initialized || localData.quick_tags_initialized;
     const rawTags = (syncData.quick_tags !== undefined) ? syncData.quick_tags :
-                    (syncData.tagsilo_tags !== undefined) ? syncData.tagsilo_tags :
                     (localData.quick_tags !== undefined) ? localData.quick_tags :
+                    (syncData.tagsilo_tags !== undefined) ? syncData.tagsilo_tags :
                     (localData.tagsilo_tags !== undefined) ? localData.tagsilo_tags :
-                    (isInitialized ? [] : DEFAULT_TAGS);
+                    (isTagsInitialized ? [] : DEFAULT_TAGS);
     tagsList = (Array.isArray(rawTags) ? rawTags : []).map(cleanTag).filter(Boolean);
-    groupsList = syncData.pipeline_groups || syncData.tagsilo_groups || localData.pipeline_groups || localData.tagsilo_groups || (isProUser ? [...DEFAULT_GROUPS] : ["Prospects"]);
+
+    const isGroupsInitialized = syncData.pipeline_groups_initialized || localData.pipeline_groups_initialized;
+    const rawGroups = (syncData.pipeline_groups !== undefined) ? syncData.pipeline_groups :
+                      (localData.pipeline_groups !== undefined) ? localData.pipeline_groups :
+                      (syncData.tagsilo_groups !== undefined) ? syncData.tagsilo_groups :
+                      (localData.tagsilo_groups !== undefined) ? localData.tagsilo_groups :
+                      (isGroupsInitialized ? [] : (isProUser ? [...DEFAULT_GROUPS] : ["Prospects"]));
+    groupsList = (Array.isArray(rawGroups) ? rawGroups : []).map(g => g.trim()).filter(Boolean);
 
     renderTagsList();
     renderGroupsList();

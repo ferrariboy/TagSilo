@@ -6,37 +6,51 @@
 
 const DEFAULT_BACKEND_ENDPOINT = "https://tagsilo.vercel.app";
 
-// Initialize default storage on installation
+// Initialize default storage on installation without overwriting user data
 chrome.runtime.onInstalled.addListener(async () => {
-  const defaults = {
-    tagsilo_tags: [
+  const stored = await chrome.storage.local.get([
+    "quick_tags",
+    "tagsilo_tags",
+    "quick_tags_initialized",
+    "pipeline_groups",
+    "tagsilo_groups",
+    "pipeline_groups_initialized",
+    "creem_license_key",
+    "license_tier",
+    "daily_sync_history",
+    "backend_server_url"
+  ]);
+
+  const updates = {};
+  if (stored.quick_tags === undefined && stored.tagsilo_tags === undefined && !stored.quick_tags_initialized) {
+    updates.quick_tags = [
       "High Priority",
       "Executive",
       "Warm Intro",
       "Founder",
       "Technical",
       "Decision Maker"
-    ],
-    tagsilo_groups: [
+    ];
+    updates.tagsilo_tags = updates.quick_tags;
+    updates.quick_tags_initialized = true;
+  }
+
+  if (stored.pipeline_groups === undefined && stored.tagsilo_groups === undefined && !stored.pipeline_groups_initialized) {
+    updates.pipeline_groups = [
       "Prospects",
       "Investors & Angels",
       "Talent & Recruiting",
       "Partnerships",
       "Key Accounts"
-    ],
-    creem_license_key: "",
-    license_tier: "free",
-    daily_sync_history: [],
-    backend_server_url: DEFAULT_BACKEND_ENDPOINT
-  };
-
-  const stored = await chrome.storage.local.get(Object.keys(defaults));
-  const updates = {};
-  for (const [key, value] of Object.entries(defaults)) {
-    if (stored[key] === undefined) {
-      updates[key] = value;
-    }
+    ];
+    updates.tagsilo_groups = updates.pipeline_groups;
+    updates.pipeline_groups_initialized = true;
   }
+
+  if (stored.backend_server_url === undefined) updates.backend_server_url = DEFAULT_BACKEND_ENDPOINT;
+  if (stored.license_tier === undefined) updates.license_tier = "free";
+  if (stored.daily_sync_history === undefined) updates.daily_sync_history = [];
+
   if (Object.keys(updates).length > 0) {
     await chrome.storage.local.set(updates);
   }

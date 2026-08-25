@@ -245,7 +245,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function loadTaxonomyAndSettings() {
     let syncData = {};
     try {
-      syncData = await chrome.storage.sync.get(["quick_tags", "tagsilo_tags", "pipeline_groups", "tagsilo_groups", "license_tier", "is_pro", "creem_license_key"]);
+      syncData = await chrome.storage.sync.get([
+        "quick_tags",
+        "tagsilo_tags",
+        "quick_tags_initialized",
+        "pipeline_groups",
+        "tagsilo_groups",
+        "pipeline_groups_initialized",
+        "license_tier",
+        "is_pro",
+        "creem_license_key"
+      ]);
     } catch (e) {}
 
     let localData = {};
@@ -253,8 +263,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       localData = await chrome.storage.local.get([
         "quick_tags",
         "tagsilo_tags",
+        "quick_tags_initialized",
         "pipeline_groups",
         "tagsilo_groups",
+        "pipeline_groups_initialized",
         "tagsilo_google_user",
         "tagsilo_google_access_token",
         "creem_license_key",
@@ -269,10 +281,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       licenseTier = "pro";
     }
 
-    let isInitialized = syncData.quick_tags_initialized || localData.quick_tags_initialized;
-    let rawTags = syncData.quick_tags || syncData.tagsilo_tags || localData.quick_tags || localData.tagsilo_tags;
+    const isTagsInitialized = syncData.quick_tags_initialized || localData.quick_tags_initialized;
+    let rawTags = (syncData.quick_tags !== undefined) ? syncData.quick_tags :
+                  (localData.quick_tags !== undefined) ? localData.quick_tags :
+                  (syncData.tagsilo_tags !== undefined) ? syncData.tagsilo_tags :
+                  (localData.tagsilo_tags !== undefined) ? localData.tagsilo_tags : null;
 
-    if (!Array.isArray(rawTags) && !isInitialized) {
+    if (!Array.isArray(rawTags) && !isTagsInitialized) {
       rawTags = DEFAULT_TAGS;
       try {
         await chrome.storage.local.set({ quick_tags: DEFAULT_TAGS, tagsilo_tags: DEFAULT_TAGS, quick_tags_initialized: true });
@@ -281,11 +296,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else if (!Array.isArray(rawTags)) {
       rawTags = [];
     }
+    quickTags = (rawTags || []).map(cleanTag).filter(Boolean);
 
-    let isGroupsInitialized = syncData.pipeline_groups_initialized || localData.pipeline_groups_initialized;
+    const isGroupsInitialized = syncData.pipeline_groups_initialized || localData.pipeline_groups_initialized;
     let rawGroups = (syncData.pipeline_groups !== undefined) ? syncData.pipeline_groups :
-                    (syncData.tagsilo_groups !== undefined) ? syncData.tagsilo_groups :
                     (localData.pipeline_groups !== undefined) ? localData.pipeline_groups :
+                    (syncData.tagsilo_groups !== undefined) ? syncData.tagsilo_groups :
                     (localData.tagsilo_groups !== undefined) ? localData.tagsilo_groups : null;
 
     if (!Array.isArray(rawGroups) && !isGroupsInitialized) {
@@ -722,11 +738,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 5. Pipeline Group Management & Dropdown Renderer
   function renderPipelineGroups() {
-    groupSelect.innerHTML = '<option value="" style="font-size: 0.52rem; background: #0F172A; color: #F8FAFC;">Select target pipeline...</option>';
+    groupSelect.innerHTML = '<option value="" style="font-size: 11px !important; font-size: 0.52rem !important; background: #0F172A; color: #F8FAFC;">Select target pipeline...</option>';
     pipelineGroups.forEach((groupName, idx) => {
       const option = document.createElement("option");
       option.value = groupName;
-      option.style.fontSize = "0.52rem";
+      option.style.setProperty("font-size", "11px", "important");
+      option.style.setProperty("font-family", "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", "important");
       option.style.backgroundColor = "#0F172A";
       option.style.color = "#F8FAFC";
 
