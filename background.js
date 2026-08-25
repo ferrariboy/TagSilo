@@ -123,23 +123,85 @@ async function handleFetchContactEmail(profileUrl) {
 }
 
 /**
+ * Universal Cross-Browser Token Provider & Silent Auto-Renewal Engine
+ */
+async function getOrRefreshAuthToken(token) {
+  let activeToken = token;
+  if (!activeToken) {
+    const local = await chrome.storage.local.get("tagsilo_google_access_token");
+    activeToken = local.tagsilo_google_access_token;
+  }
+
+  // 1. Check if token is still valid with Google Userinfo API
+  if (activeToken) {
+    try {
+      const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: { Authorization: `Bearer ${activeToken}` }
+      });
+      if (res.ok) return activeToken;
+    } catch (e) {}
+  }
+
+  // 2. Token expired: perform serverless token refresh
+  try {
+    const { tagsilo_google_refresh_token, tagsilo_google_user } = await chrome.storage.local.get([
+      "tagsilo_google_refresh_token",
+      "tagsilo_google_user"
+    ]);
+
+    const email = tagsilo_google_user?.email || "";
+    if (tagsilo_google_refresh_token || email) {
+      const refreshRes = await fetch("https://tagsilo.vercel.app/api/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          refresh_token: tagsilo_google_refresh_token || "",
+          email: email
+        })
+      });
+
+      if (refreshRes.ok) {
+        const refreshData = await refreshRes.json();
+        if (refreshData.success && refreshData.access_token) {
+          await chrome.storage.local.set({ tagsilo_google_access_token: refreshData.access_token });
+          return refreshData.access_token;
+        }
+      }
+    }
+  } catch (refreshErr) {
+    console.warn("[TagSilo Background] Silent refresh notice:", refreshErr);
+  }
+
+  // 3. Fallback: Chrome Identity API safely wrapped (no unchecked errors on Edge)
+  try {
+    if (chrome.identity && typeof chrome.identity.getAuthToken === "function") {
+      const nativeTok = await new Promise((resolve) => {
+        chrome.identity.getAuthToken({ interactive: false }, (tok) => {
+          if (chrome.runtime.lastError) {
+            const _ignored = chrome.runtime.lastError.message;
+            return resolve(null);
+          }
+          resolve(tok || null);
+        });
+      });
+
+      if (nativeTok) {
+        await chrome.storage.local.set({ tagsilo_google_access_token: nativeTok });
+        return nativeTok;
+      }
+    }
+  } catch (e) {}
+
+  return activeToken || null;
+}
+
+/**
  * Check if a profile URL already exists in the Google Sheet (Anti-Duplicate Engine)
  */
 async function checkExistingProfileInSheet(profileUrl, token) {
   if (!profileUrl) return { exists: false };
 
-  let authToken = token;
-  if (!authToken) {
-    const localStore = await chrome.storage.local.get("tagsilo_google_access_token");
-    authToken = localStore.tagsilo_google_access_token;
-  }
-  if (!authToken) {
-    try {
-      authToken = await new Promise((resolve) => {
-        chrome.identity.getAuthToken({ interactive: false }, (tok) => resolve(tok || null));
-      });
-    } catch (e) {}
-  }
+  const authToken = await getOrRefreshAuthToken(token);
   if (!authToken) return { exists: false };
 
   let { active_google_sheet_id } = await chrome.storage.local.get("active_google_sheet_id");
@@ -486,21 +548,7 @@ async function recordSyncSuccess() {
  * Updates matching row if profile is already saved to prevent duplicates!
  */
 async function executeDirectGoogleSheetsSync(token, profileData) {
-  let activeToken = token;
-
-  // Validate or Refresh Token if needed
-  if (!activeToken) {
-    const localStore = await chrome.storage.local.get("tagsilo_google_access_token");
-    activeToken = localStore.tagsilo_google_access_token;
-  }
-
-  if (!activeToken) {
-    try {
-      activeToken = await new Promise((resolve) => {
-        chrome.identity.getAuthToken({ interactive: false }, (tok) => resolve(tok || null));
-      });
-    } catch (e) {}
-  }
+  let activeToken = await getOrRefreshAuthToken(token);
 
   if (!activeToken) {
     throw new Error("Google OAuth authorization token is missing or expired. Please sign in with Google.");
@@ -513,21 +561,16 @@ async function executeDirectGoogleSheetsSync(token, profileData) {
 
     let res = await fetch(url, options);
     if (res.status === 401) {
-      console.warn("[TagSilo Background] Received 401 Unauthorized from Google API. Refreshing token...");
+      console.warn("[TagSilo Background] Received 401 Unauthorized from Google API. Refreshing token silently...");
       try {
-        await new Promise((r) => chrome.identity.removeCachedAuthToken({ token: activeToken }, r));
-        const refreshedToken = await new Promise((resolve) => {
-          chrome.identity.getAuthToken({ interactive: false }, (tok) => resolve(tok || null));
-        });
-
-        if (refreshedToken) {
+        const refreshedToken = await getOrRefreshAuthToken(null);
+        if (refreshedToken && refreshedToken !== activeToken) {
           activeToken = refreshedToken;
-          await chrome.storage.local.set({ tagsilo_google_access_token: refreshedToken });
           options.headers["Authorization"] = `Bearer ${activeToken}`;
           res = await fetch(url, options);
         }
       } catch (refreshErr) {
-        console.warn("[TagSilo Background] Token refresh failed:", refreshErr);
+        console.warn("[TagSilo Background] Token refresh retry failed:", refreshErr);
       }
     }
     return res;

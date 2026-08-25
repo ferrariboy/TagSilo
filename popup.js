@@ -1036,140 +1036,154 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Cross-Browser Google Authorization (Native 1-Click with Direct Google OAuth Fallback)
-  async function authenticateWithGoogle(interactive = true) {
-    // 1. Try Native Chrome Extension Identity API (Google Chrome 1-Click)
+  // Cross-Browser Silent Token Renewal via Serverless Backend Proxy
+  async function refreshGoogleAccessToken() {
     try {
-      const nativeToken = await new Promise((resolve, reject) => {
-        chrome.identity.getAuthToken({ interactive: interactive }, (tok) => {
-          if (chrome.runtime.lastError) {
-            return reject(new Error(chrome.runtime.lastError.message));
-          }
-          if (!tok) {
-            return reject(new Error("No access token returned by Google Identity."));
-          }
-          resolve(tok);
-        });
+      const { tagsilo_google_refresh_token, tagsilo_google_user } = await chrome.storage.local.get([
+        "tagsilo_google_refresh_token",
+        "tagsilo_google_user"
+      ]);
+
+      const email = tagsilo_google_user?.email || "";
+      if (!tagsilo_google_refresh_token && !email) return null;
+
+      const res = await fetch(`${DEFAULT_VERCEL_URL}/api/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          refresh_token: tagsilo_google_refresh_token || "",
+          email: email
+        })
       });
 
-      if (nativeToken) {
-        let userProfile = null;
-        try {
-          const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-            headers: { Authorization: `Bearer ${nativeToken}` }
-          });
-          if (userRes.ok) {
-            userProfile = await userRes.json();
-          }
-        } catch (e) {}
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.access_token) {
+          const freshToken = data.access_token;
+          await chrome.storage.local.set({ tagsilo_google_access_token: freshToken });
+          currentAuthToken = freshToken;
+          return freshToken;
+        }
+      }
+    } catch (err) {
+      console.warn("[TagSilo Pro] Silent token refresh notice:", err);
+    }
+    return null;
+  }
 
+  // Cross-Browser Google Authorization (Edge, Chrome, Brave, Arc, Opera, Vivaldi compatible)
+  async function authenticateWithGoogle(interactive = true) {
+    // 1. For non-interactive (silent) check, always use serverless refresh first
+    if (!interactive) {
+      const refreshedToken = await refreshGoogleAccessToken();
+      if (refreshedToken) {
         const { tagsilo_google_user } = await chrome.storage.local.get("tagsilo_google_user");
-        const googleUser = {
-          email: userProfile?.email || tagsilo_google_user?.email || "Google Account Connected",
-          name: userProfile?.name || tagsilo_google_user?.name || "",
-          picture: userProfile?.picture || tagsilo_google_user?.picture || "",
-          lastAuth: new Date().toISOString()
-        };
-
-        currentAuthToken = nativeToken;
-        currentGoogleUser = googleUser;
-
-        await chrome.storage.local.set({
-          tagsilo_google_access_token: nativeToken,
-          tagsilo_google_user: googleUser
-        });
-
-        // Auto-Ingest / Sync user lead into Supabase database (Free or Pro)
-        syncUserToBackend(googleUser);
-
-        return { token: nativeToken, user: googleUser };
+        return { token: refreshedToken, user: tagsilo_google_user };
       }
-    } catch (nativeErr) {
-      if (!interactive) {
-        throw nativeErr;
-      }
-    }
 
-    // 2. Enterprise Backend OAuth Proxy via launchWebAuthFlow
-    if (interactive) {
-      const returnUrl = chrome.identity.getRedirectURL("auth");
-      const authEndpoint = `${DEFAULT_VERCEL_URL}/api/auth/google?redirect_to=${encodeURIComponent(returnUrl)}&chrome_id=${encodeURIComponent(chrome.runtime.id)}`;
-
-      return new Promise((resolve, reject) => {
-        chrome.identity.launchWebAuthFlow(
-          {
-            url: authEndpoint,
-            interactive: true
-          },
-          async (responseUrl) => {
-            if (chrome.runtime.lastError || !responseUrl) {
-              return reject(new Error(chrome.runtime.lastError?.message || "Google authentication was cancelled or closed."));
-            }
-
-            try {
-              const urlObj = new URL(responseUrl);
-              const errParam = urlObj.searchParams.get("error");
-              if (errParam) {
-                return reject(new Error(urlObj.searchParams.get("error_description") || errParam));
+      // Safe check for Chrome Identity API (handles Edge / unsupported gracefully)
+      try {
+        if (chrome.identity && typeof chrome.identity.getAuthToken === "function") {
+          const nativeToken = await new Promise((resolve) => {
+            chrome.identity.getAuthToken({ interactive: false }, (tok) => {
+              if (chrome.runtime.lastError) {
+                // Accessing lastError property suppresses unchecked error in console
+                const _ignored = chrome.runtime.lastError.message;
+                return resolve(null);
               }
+              resolve(tok || null);
+            });
+          });
 
-              const accessToken = urlObj.searchParams.get("token") || urlObj.searchParams.get("access_token");
-              const refreshToken = urlObj.searchParams.get("refresh_token") || "";
-              const userRaw = urlObj.searchParams.get("user");
-
-              if (!accessToken) {
-                return reject(new Error("No access token parameter found in OAuth redirect callback."));
-              }
-
-              let userProfile = null;
-              if (userRaw) {
-                try {
-                  userProfile = JSON.parse(decodeURIComponent(userRaw));
-                } catch (e) {}
-              }
-
-              if (!userProfile || !userProfile.email) {
-                try {
-                  const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-                    headers: { Authorization: `Bearer ${accessToken}` }
-                  });
-                  if (userRes.ok) {
-                    userProfile = await userRes.json();
-                  }
-                } catch (e) {}
-              }
-
-              const googleUser = {
-                email: userProfile?.email || "Google Account Connected",
-                name: userProfile?.name || "",
-                picture: userProfile?.picture || "",
-                lastAuth: new Date().toISOString()
-              };
-
-              currentAuthToken = accessToken;
-              currentGoogleUser = googleUser;
-
-              await chrome.storage.local.set({
-                tagsilo_google_access_token: accessToken,
-                tagsilo_google_user: googleUser,
-                tagsilo_google_refresh_token: refreshToken
-              });
-
-              syncUserToBackend(googleUser);
-
-              resolve({
-                token: accessToken,
-                user: googleUser
-              });
-            } catch (parseErr) {
-              reject(new Error("Failed to parse token from OAuth callback: " + parseErr.message));
-            }
+          if (nativeToken) {
+            const { tagsilo_google_user } = await chrome.storage.local.get("tagsilo_google_user");
+            currentAuthToken = nativeToken;
+            await chrome.storage.local.set({ tagsilo_google_access_token: nativeToken });
+            return { token: nativeToken, user: tagsilo_google_user };
           }
-        );
-      });
+        }
+      } catch (e) {}
+
+      throw new Error("Silent authentication token not available.");
     }
 
-    throw new Error("Google authentication could not complete.");
+    // 2. Interactive Google Authorization via launchWebAuthFlow (Universal across all browsers)
+    const returnUrl = chrome.identity.getRedirectURL("auth");
+    const authEndpoint = `${DEFAULT_VERCEL_URL}/api/auth/google?redirect_to=${encodeURIComponent(returnUrl)}&chrome_id=${encodeURIComponent(chrome.runtime.id)}&prompt=select_account`;
+
+    return new Promise((resolve, reject) => {
+      chrome.identity.launchWebAuthFlow(
+        {
+          url: authEndpoint,
+          interactive: true
+        },
+        async (responseUrl) => {
+          if (chrome.runtime.lastError || !responseUrl) {
+            return reject(new Error(chrome.runtime.lastError?.message || "Google authentication was cancelled."));
+          }
+
+          try {
+            const urlObj = new URL(responseUrl);
+            const errParam = urlObj.searchParams.get("error");
+            if (errParam) {
+              return reject(new Error(urlObj.searchParams.get("error_description") || errParam));
+            }
+
+            const accessToken = urlObj.searchParams.get("token") || urlObj.searchParams.get("access_token");
+            const refreshToken = urlObj.searchParams.get("refresh_token") || "";
+            const userRaw = urlObj.searchParams.get("user");
+
+            if (!accessToken) {
+              return reject(new Error("No access token parameter found in OAuth redirect callback."));
+            }
+
+            let userProfile = null;
+            if (userRaw) {
+              try {
+                userProfile = JSON.parse(decodeURIComponent(userRaw));
+              } catch (e) {}
+            }
+
+            if (!userProfile || !userProfile.email) {
+              try {
+                const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                  headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                if (userRes.ok) {
+                  userProfile = await userRes.json();
+                }
+              } catch (e) {}
+            }
+
+            const googleUser = {
+              email: userProfile?.email || "Google Account Connected",
+              name: userProfile?.name || "",
+              picture: userProfile?.picture || "",
+              lastAuth: new Date().toISOString()
+            };
+
+            currentAuthToken = accessToken;
+            currentGoogleUser = googleUser;
+
+            await chrome.storage.local.set({
+              tagsilo_google_access_token: accessToken,
+              tagsilo_google_user: googleUser,
+              tagsilo_google_refresh_token: refreshToken
+            });
+
+            // Auto-Ingest / Sync user lead into Supabase database (Free or Pro)
+            syncUserToBackend(googleUser);
+
+            resolve({
+              token: accessToken,
+              user: googleUser
+            });
+          } catch (parseErr) {
+            reject(new Error("Failed to parse token from OAuth callback: " + parseErr.message));
+          }
+        }
+      );
+    });
   }
 
   // 1.1 Auto-Sync / Register user lead into Supabase PostgreSQL (Free or Pro)
@@ -1194,61 +1208,59 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Robust Persistent Auth Check (No unwanted sign-outs!)
   async function checkGoogleAuthState() {
-    const { tagsilo_google_access_token, tagsilo_google_user } = await chrome.storage.local.get([
+    const { tagsilo_google_access_token, tagsilo_google_user, tagsilo_google_refresh_token } = await chrome.storage.local.get([
       "tagsilo_google_access_token",
-      "tagsilo_google_user"
+      "tagsilo_google_user",
+      "tagsilo_google_refresh_token"
     ]);
 
     // 1. If stored user profile exists, IMMEDIATELY render them as authenticated (persistent session)
     if (tagsilo_google_user && tagsilo_google_user.email) {
       renderAuthenticatedUser(tagsilo_google_user, tagsilo_google_access_token || null);
+    } else {
+      renderUnauthenticatedUser();
+      return;
     }
 
     // 2. Silently validate or refresh token in background
-    if (tagsilo_google_access_token) {
+    let validToken = tagsilo_google_access_token;
+    if (validToken) {
       try {
         const checkRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: { Authorization: `Bearer ${tagsilo_google_access_token}` }
+          headers: { Authorization: `Bearer ${validToken}` }
         });
 
         if (checkRes.ok) {
           const userProfile = await checkRes.json();
-          currentAuthToken = tagsilo_google_access_token;
+          currentAuthToken = validToken;
           currentGoogleUser = {
-            email: userProfile?.email || tagsilo_google_user?.email || "Google Account Connected",
-            name: userProfile?.name || tagsilo_google_user?.name || "",
-            picture: userProfile?.picture || tagsilo_google_user?.picture || "",
+            email: userProfile?.email || tagsilo_google_user.email,
+            name: userProfile?.name || tagsilo_google_user.name || "",
+            picture: userProfile?.picture || tagsilo_google_user.picture || "",
             lastAuth: new Date().toISOString()
           };
           renderAuthenticatedUser(currentGoogleUser, currentAuthToken);
           return;
-        } else {
-          // Token expired, remove old cached token from Chrome Identity cache
-          try {
-            await new Promise((r) => chrome.identity.removeCachedAuthToken({ token: tagsilo_google_access_token }, r));
-          } catch (e) {}
         }
       } catch (networkErr) {
         console.warn("[TagSilo Pro] Token verification network note:", networkErr);
       }
     }
 
-    // 3. Try silent refresh to get a fresh access token without prompting user
+    // 3. Token expired or invalid: Silently renew via refresh token in background
     try {
-      const silentAuth = await authenticateWithGoogle(false);
-      if (silentAuth && silentAuth.token) {
-        renderAuthenticatedUser(silentAuth.user, silentAuth.token);
+      const refreshedToken = await refreshGoogleAccessToken();
+      if (refreshedToken) {
+        currentAuthToken = refreshedToken;
+        renderAuthenticatedUser(tagsilo_google_user, refreshedToken);
         return;
       }
-    } catch (silentErr) {}
-
-    // 4. If user was previously signed in, PRESERVE their authenticated state (token will refresh on sync)
-    if (tagsilo_google_user && tagsilo_google_user.email) {
-      renderAuthenticatedUser(tagsilo_google_user, null);
-      return;
+    } catch (refreshErr) {
+      console.warn("[TagSilo Pro] Background refresh note:", refreshErr);
     }
 
-    renderUnauthenticatedUser();
+    // 4. Preserve authenticated UI state even if offline
+    renderAuthenticatedUser(tagsilo_google_user, null);
   }
 
   function renderAuthenticatedUser(user, token) {
