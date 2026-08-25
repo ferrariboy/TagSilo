@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TagSilo Pro</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="popup-container">
+    
+    <!-- Toast Notification -->
+    <div id="syncToast" class="sync-toast">
+      <div class="toast-msg-wrap">
+        <span class="toast-icon">✓</span>
+        <span id="toastMessage" class="toast-text">Lead synced to spreadsheet</span>
+      </div>
+      <a id="toastSheetLink" class="toast-link" href="#" target="_blank">Open Sheet</a>
+    </div>
+
+    <!-- Top Navigation & Brand Header -->
+    <header class="popup-header">
+      <div class="brand-group">
+        <img src="assets/tagsilo-wordmark-matched-dark.svg" alt="TagSilo Pro" class="brand-wordmark">
+        <span id="headerTierBadge" class="tier-badge free">FREE</span>
+      </div>
+      <div class="header-actions">
+        <div id="dailyCapPill" class="quota-pill" title="Daily profile sync usage">
+          <span id="dailyCapIcon">⚡</span>
+          <span id="dailyCapText">0/3 Saves</span>
+        </div>
+        <button id="openOptionsBtn" class="icon-btn settings-trigger" type="button" title="Configure Pipelines & Tags" aria-label="Open Settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Workspace Deck -->
+    <main class="popup-content">
+      
+      <!-- 1. Google Workspace Connection Surface -->
+      <section id="googleAuthSection" class="surface-card auth-card">
+        <button id="googleSignInBtn" class="google-connect-btn" type="button">
+          <svg class="google-logo" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Connect Google Workspace</span>
+        </button>
+
+        <div id="googleUserBar" class="user-session-row" style="display: none;">
+          <img id="userAvatarImg" class="session-avatar" src="" alt="Google Profile" style="display: none;">
+          <div id="userAvatarPlaceholder" class="session-avatar avatar-fallback">G</div>
+          <div class="session-meta">
+            <span id="userEmailText" class="session-email">user@gmail.com</span>
+            <span class="session-status">Google Sheets Sync Active</span>
+          </div>
+          <button id="disconnectGoogleBtn" class="icon-btn disconnect-btn" type="button" title="Disconnect Google Account">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. Lead Profile Surface Card -->
+      <section class="surface-card">
+        <div class="surface-header">
+          <span class="section-label">Lead Details</span>
+          <div class="header-tools">
+            <div id="detectStatusBadge" class="telemetry-badge">
+              <span class="telemetry-dot"></span>
+              <span id="detectStatusText">Scanning LinkedIn...</span>
+            </div>
+            <button id="refreshMetaBtn" class="icon-btn refresh-btn" type="button" title="Refresh Profile Data">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="profile-card-body">
+          <div class="lead-avatar-wrap">
+            <img id="leadAvatarImg" class="lead-avatar-img" alt="Lead Avatar" referrerpolicy="no-referrer" style="display: none;">
+            <div id="leadAvatarPlaceholder" class="lead-avatar-img lead-avatar-fallback">?</div>
+          </div>
+          <div class="lead-text-meta">
+            <input type="text" id="leadNameInput" class="lead-name-field" placeholder="Lead Full Name" autocomplete="off" spellcheck="false">
+            <div id="profileJobTitle" class="lead-title-field">Scanning headline...</div>
+          </div>
+        </div>
+
+        <div class="meta-pills-row">
+          <div id="profileUrlBadge" class="meta-pill url-pill">https://linkedin.com</div>
+          <div id="profileEmailBadge" class="meta-pill email-pill">Email: Searching...</div>
+        </div>
+
+        <div id="alreadyTaggedBanner" class="record-found-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="record-found-text">
+            <strong>Record Already Synced</strong>
+            <span id="taggedDateText">Found in spreadsheet</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Pipeline Group Surface -->
+      <section class="surface-card" id="pipelineGroupCard">
+        <div class="surface-header">
+          <span class="section-label">Pipeline Group</span>
+        </div>
+        <div class="custom-dropdown-wrap" id="customGroupDropdownWrap">
+          <button type="button" class="custom-dropdown-trigger" id="customGroupTrigger">
+            <span id="customGroupSelectedText">Select target pipeline...</span>
+            <svg class="dropdown-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="custom-dropdown-menu" id="customGroupMenu" style="display: none;">
+            <!-- Dynamically populated options -->
+          </div>
+        </div>
+        <select id="groupSelect" class="studio-select" style="display: none;">
+          <option value="">Select target pipeline...</option>
+        </select>
+      </section>
+
+      <!-- 4. Profile Tags Taxonomy -->
+      <section class="surface-card">
+        <div class="surface-header">
+          <span class="section-label">Profile Tags (<span id="activeCountLabel">0</span>)</span>
+          <span id="tagLimitCounter" class="tag-counter-label">0 of 2 Applied</span>
+        </div>
+        <div id="activeTagsBox" class="active-tags-surface">
+          <span class="empty-tags-hint">No tags applied — select presets below</span>
+        </div>
+        <div class="custom-tag-row">
+          <input type="text" id="customActiveTagInput" class="tag-input-field" placeholder="Add custom tag..." autocomplete="off">
+          <button id="addActiveTagBtn" class="tag-add-button" type="button">+ Add</button>
+        </div>
+        <div id="inlineTagLimitBanner" class="limit-alert-banner">
+          <span>Free plan includes 2 active tags per lead. Upgrade to Pro for unlimited tags.</span>
+        </div>
+      </section>
+
+      <!-- 5. Preset Quick Tags Grid -->
+      <section class="surface-card">
+        <div class="surface-header">
+          <span class="section-label">Quick Presets</span>
+        </div>
+        <div id="quickTagsGrid" class="presets-grid">
+          <!-- Dynamically populated from settings -->
+        </div>
+      </section>
+
+      <!-- 6. Enrichment Notes & Context -->
+      <section class="surface-card">
+        <div class="surface-header">
+          <span class="section-label">Enrichment Notes</span>
+          <span id="charCountLabel" class="char-count-label">0/500</span>
+        </div>
+        <textarea id="leadNotesInput" class="notes-field" rows="2" placeholder="Add meeting notes, mutual connections, or next steps..." maxlength="500"></textarea>
+      </section>
+
+    </main>
+
+    <!-- Fixed Action Deck & Version Telemetry -->
+    <footer class="popup-footer">
+      <button id="primarySyncBtn" class="sync-action-btn" type="button">
+        <span id="syncBtnSpinner" class="action-spinner" style="display: none;"></span>
+        <span id="syncBtnIcon" class="action-btn-icon">⚡</span>
+        <span id="syncBtnText">Sync Lead to Spreadsheet</span>
+      </button>
+      <div class="footer-meta-row">
+        <a id="sheetShortcutLink" class="sheet-link" style="display: none;" target="_blank">Open Pipeline Sheet ↗</a>
+        <span class="footer-telemetry">TagSilo Pro <span id="footerVersionText">v1.2.0</span> • Ready</span>
+      </div>
+    </footer>
+
+    <!-- Paywall Modal (Strictly Pro Restricted) -->
+    <div id="paywallModalOverlay" class="paywall-overlay" style="display: none !important;">
+      <div class="paywall-sheet">
+        <div class="paywall-sheet-header">
+          <span class="paywall-tag">PRO PLAN</span>
+          <button id="closePaywallBtn" class="icon-btn" type="button" title="Dismiss">✕</button>
+        </div>
+
+        <h3 class="paywall-sheet-title">Upgrade to TagSilo Pro</h3>
+        <p id="paywallDynamicMessage" class="paywall-sheet-desc">
+          You have reached the 3 daily profile exports included on the Free plan. Upgrade to Pro for unlimited exports and custom workflows.
+        </p>
+
+        <div class="paywall-benefits-box">
+          <div class="benefit-row"><span class="benefit-check">✓</span> <span>Unlimited Daily Profile Synchronizations</span></div>
+          <div class="benefit-row"><span class="benefit-check">✓</span> <span>Custom Pipeline Routing & Target Sheets</span></div>
+          <div class="benefit-row"><span class="benefit-check">✓</span> <span>Unlimited Simultaneous Tag Taxonomies</span></div>
+        </div>
+
+        <a id="creemCheckoutBtn" href="https://creem.io/checkout/tagsilo-pro" target="_blank" class="paywall-cta-btn">
+          <span>Upgrade to Pro — $9.99/mo</span>
+        </a>
+
+        <div id="enterLicenseLink" class="paywall-license-action">
+          Have a License Key or Discount Code? Open Settings
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
