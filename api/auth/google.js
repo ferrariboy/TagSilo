@@ -44,7 +44,8 @@ module.exports = async (req, res) => {
       response_type: "code",
       scope: SCOPES,
       access_type: "offline",
-      prompt: prompt || "select_account",
+      prompt: prompt || "consent select_account",
+      include_granted_scopes: "true",
       state: stateStr
     });
 

@@ -67,7 +67,9 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       success: true,
       access_token: tokenData.access_token,
-      expires_in: tokenData.expires_in
+      refresh_token: tokenData.refresh_token || resolvedRefreshToken,
+      expires_in: tokenData.expires_in || 3600,
+      acquired_at: Date.now()
     });
   } catch (err) {
     console.error("[TagSilo Auth] Refresh error:", err);

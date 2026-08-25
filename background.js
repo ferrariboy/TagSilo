@@ -137,17 +137,25 @@ async function handleFetchContactEmail(profileUrl) {
 }
 
 /**
- * Universal Cross-Browser Token Provider & Silent Auto-Renewal Engine
+ * Universal Cross-Browser Token Provider & Silent Proactive Auto-Renewal Engine
+ * Proactively rotates Google access tokens before the 60-minute expiry window using permanent refresh tokens.
  */
 async function getOrRefreshAuthToken(token, forceRefresh = false) {
-  let activeToken = token;
-  if (!activeToken && !forceRefresh) {
-    const local = await chrome.storage.local.get("tagsilo_google_access_token");
-    activeToken = local.tagsilo_google_access_token;
-  }
+  const [localData, syncData] = await Promise.all([
+    chrome.storage.local.get(["tagsilo_google_access_token", "tagsilo_google_refresh_token", "tagsilo_google_user", "tagsilo_token_acquired_at"]),
+    chrome.storage.sync.get(["tagsilo_google_refresh_token", "tagsilo_google_user", "tagsilo_token_acquired_at"]).catch(() => ({}))
+  ]);
 
-  // 1. Check if token is still valid with Google Userinfo API (skip if forceRefresh)
-  if (activeToken && !forceRefresh) {
+  let activeToken = token || localData.tagsilo_google_access_token || null;
+  const refreshToken = localData.tagsilo_google_refresh_token || syncData.tagsilo_google_refresh_token || "";
+  const googleUser = localData.tagsilo_google_user || syncData.tagsilo_google_user || null;
+  const acquiredAt = localData.tagsilo_token_acquired_at || syncData.tagsilo_token_acquired_at || 0;
+
+  const TOKEN_MAX_AGE_MS = 50 * 60 * 1000; // 50 minutes (tokens last 60 minutes)
+  const isTokenExpiredOrAging = forceRefresh || !activeToken || (acquiredAt > 0 && (Date.now() - acquiredAt > TOKEN_MAX_AGE_MS));
+
+  // 1. If token is fresh (<50m old) and not forced, quickly verify validity
+  if (activeToken && !isTokenExpiredOrAging) {
     try {
       const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
         headers: { Authorization: `Bearer ${activeToken}` }
@@ -156,37 +164,47 @@ async function getOrRefreshAuthToken(token, forceRefresh = false) {
     } catch (e) {}
   }
 
-  // 2. Token expired or force refresh: perform serverless token refresh
-  try {
-    const { tagsilo_google_refresh_token, tagsilo_google_user } = await chrome.storage.local.get([
-      "tagsilo_google_refresh_token",
-      "tagsilo_google_user"
-    ]);
-
-    const email = tagsilo_google_user?.email || "";
-    if (tagsilo_google_refresh_token || email) {
+  // 2. Token is aged, expired, or invalid: Perform Proactive Serverless Refresh
+  if (refreshToken || googleUser?.email) {
+    try {
       const refreshRes = await fetch("https://tagsilo.vercel.app/api/auth/refresh", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          refresh_token: tagsilo_google_refresh_token || "",
-          email: email
+          refresh_token: refreshToken || "",
+          email: googleUser?.email || ""
         })
       });
 
       if (refreshRes.ok) {
         const refreshData = await refreshRes.json();
         if (refreshData.success && refreshData.access_token) {
-          await chrome.storage.local.set({ tagsilo_google_access_token: refreshData.access_token });
-          return refreshData.access_token;
+          const freshToken = refreshData.access_token;
+          const freshRefreshToken = refreshData.refresh_token || refreshToken;
+          const freshAcquiredAt = refreshData.acquired_at || Date.now();
+
+          // Vault fresh tokens redundantly in both local and sync storage
+          await Promise.all([
+            chrome.storage.local.set({
+              tagsilo_google_access_token: freshToken,
+              tagsilo_google_refresh_token: freshRefreshToken,
+              tagsilo_token_acquired_at: freshAcquiredAt
+            }),
+            chrome.storage.sync.set({
+              tagsilo_google_refresh_token: freshRefreshToken,
+              tagsilo_token_acquired_at: freshAcquiredAt
+            }).catch(() => {})
+          ]);
+
+          return freshToken;
         }
       }
+    } catch (refreshErr) {
+      console.warn("[TagSilo Background] Proactive silent refresh notice:", refreshErr);
     }
-  } catch (refreshErr) {
-    console.warn("[TagSilo Background] Silent refresh notice:", refreshErr);
   }
 
-  // 3. Fallback: Chrome Identity API safely wrapped (no unchecked errors on Edge)
+  // 3. Fallback: Chrome Identity API (wrapped safely for Edge / Chrome)
   try {
     if (chrome.identity && typeof chrome.identity.getAuthToken === "function") {
       const nativeTok = await new Promise((resolve) => {
@@ -200,7 +218,10 @@ async function getOrRefreshAuthToken(token, forceRefresh = false) {
       });
 
       if (nativeTok) {
-        await chrome.storage.local.set({ tagsilo_google_access_token: nativeTok });
+        await chrome.storage.local.set({
+          tagsilo_google_access_token: nativeTok,
+          tagsilo_token_acquired_at: Date.now()
+        });
         return nativeTok;
       }
     }

@@ -1140,21 +1140,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Cross-Browser Silent Token Renewal via Serverless Backend Proxy
+  // Cross-Browser Silent Token Renewal via Serverless Backend Proxy
   async function refreshGoogleAccessToken() {
     try {
-      const { tagsilo_google_refresh_token, tagsilo_google_user } = await chrome.storage.local.get([
-        "tagsilo_google_refresh_token",
-        "tagsilo_google_user"
+      const [localData, syncData] = await Promise.all([
+        chrome.storage.local.get(["tagsilo_google_refresh_token", "tagsilo_google_user", "tagsilo_token_acquired_at"]),
+        chrome.storage.sync.get(["tagsilo_google_refresh_token", "tagsilo_google_user", "tagsilo_token_acquired_at"]).catch(() => ({}))
       ]);
 
-      const email = tagsilo_google_user?.email || "";
-      if (!tagsilo_google_refresh_token && !email) return null;
+      const refreshToken = localData.tagsilo_google_refresh_token || syncData.tagsilo_google_refresh_token || "";
+      const email = localData.tagsilo_google_user?.email || syncData.tagsilo_google_user?.email || "";
+      if (!refreshToken && !email) return null;
 
       const res = await fetch(`${DEFAULT_VERCEL_URL}/api/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          refresh_token: tagsilo_google_refresh_token || "",
+          refresh_token: refreshToken || "",
           email: email
         })
       });
@@ -1163,7 +1165,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         const data = await res.json();
         if (data.success && data.access_token) {
           const freshToken = data.access_token;
-          await chrome.storage.local.set({ tagsilo_google_access_token: freshToken });
+          const freshRefreshToken = data.refresh_token || refreshToken;
+          const freshAcquiredAt = data.acquired_at || Date.now();
+
+          await Promise.all([
+            chrome.storage.local.set({
+              tagsilo_google_access_token: freshToken,
+              tagsilo_google_refresh_token: freshRefreshToken,
+              tagsilo_token_acquired_at: freshAcquiredAt
+            }),
+            chrome.storage.sync.set({
+              tagsilo_google_refresh_token: freshRefreshToken,
+              tagsilo_token_acquired_at: freshAcquiredAt
+            }).catch(() => {})
+          ]);
+
           currentAuthToken = freshToken;
           return freshToken;
         }
@@ -1190,7 +1206,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           const nativeToken = await new Promise((resolve) => {
             chrome.identity.getAuthToken({ interactive: false }, (tok) => {
               if (chrome.runtime.lastError) {
-                // Accessing lastError property suppresses unchecked error in console
                 const _ignored = chrome.runtime.lastError.message;
                 return resolve(null);
               }
@@ -1201,7 +1216,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (nativeToken) {
             const { tagsilo_google_user } = await chrome.storage.local.get("tagsilo_google_user");
             currentAuthToken = nativeToken;
-            await chrome.storage.local.set({ tagsilo_google_access_token: nativeToken });
+            await chrome.storage.local.set({
+              tagsilo_google_access_token: nativeToken,
+              tagsilo_token_acquired_at: Date.now()
+            });
             return { token: nativeToken, user: tagsilo_google_user };
           }
         }
@@ -1210,9 +1228,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       throw new Error("Silent authentication token not available.");
     }
 
-    // 2. Interactive Google Authorization via launchWebAuthFlow (Universal across all browsers)
+    // 2. Interactive Google Authorization via launchWebAuthFlow (Guarantees permanent refresh token with prompt=consent)
     const returnUrl = chrome.identity.getRedirectURL("auth");
-    const authEndpoint = `${DEFAULT_VERCEL_URL}/api/auth/google?redirect_to=${encodeURIComponent(returnUrl)}&chrome_id=${encodeURIComponent(chrome.runtime.id)}&prompt=select_account`;
+    const authEndpoint = `${DEFAULT_VERCEL_URL}/api/auth/google?redirect_to=${encodeURIComponent(returnUrl)}&chrome_id=${encodeURIComponent(chrome.runtime.id)}&prompt=consent%20select_account`;
 
     return new Promise((resolve, reject) => {
       chrome.identity.launchWebAuthFlow(
@@ -1268,11 +1286,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             currentAuthToken = accessToken;
             currentGoogleUser = googleUser;
 
-            await chrome.storage.local.set({
-              tagsilo_google_access_token: accessToken,
-              tagsilo_google_user: googleUser,
-              tagsilo_google_refresh_token: refreshToken
-            });
+            await Promise.all([
+              chrome.storage.local.set({
+                tagsilo_google_access_token: accessToken,
+                tagsilo_google_user: googleUser,
+                tagsilo_google_refresh_token: refreshToken,
+                tagsilo_token_acquired_at: Date.now()
+              }),
+              chrome.storage.sync.set({
+                tagsilo_google_user: googleUser,
+                tagsilo_google_refresh_token: refreshToken,
+                tagsilo_token_acquired_at: Date.now()
+              }).catch(() => {})
+            ]);
 
             // Auto-Ingest / Sync user lead into Supabase database (Free or Pro)
             syncUserToBackend(googleUser);
@@ -1506,7 +1532,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         userEmail: currentGoogleUser?.email || ""
       };
 
-      // 4. Execute Google Sheets Synchronization via Background Service Worker
+      // 4. Proactive Token Refresh (Renew automatically before expiry to avoid interruptions)
+      const { tagsilo_token_acquired_at } = await chrome.storage.local.get("tagsilo_token_acquired_at");
+      if (tagsilo_token_acquired_at && (Date.now() - tagsilo_token_acquired_at > 50 * 60 * 1000)) {
+        try {
+          const freshToken = await refreshGoogleAccessToken();
+          if (freshToken) currentAuthToken = freshToken;
+        } catch (e) {}
+      }
+
+      // Execute Google Sheets Synchronization via Background Service Worker
       let response = await chrome.runtime.sendMessage({
         action: "EXECUTE_SYNC",
         profileData: profileData,
