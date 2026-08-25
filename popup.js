@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           headerTierBadge.textContent = "PRO";
           headerTierBadge.className = "tier-badge pro";
         }
-        if (dailyCapIcon) dailyCapIcon.textContent = "👑";
+        if (dailyCapIcon) dailyCapIcon.textContent = "∞";
         if (dailyCapText) dailyCapText.textContent = "Unlimited Sync";
         if (dailyCapPill) dailyCapPill.className = "quota-pill pro-pill";
         if (inlineTagLimitBanner) inlineTagLimitBanner.style.display = "none";
@@ -326,7 +326,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           licenseTier = data.tier || "pro";
           headerTierBadge.textContent = licenseTier.toUpperCase();
           headerTierBadge.className = "tier-badge pro";
-          dailyCapIcon.textContent = "👑";
+          dailyCapIcon.textContent = "∞";
           dailyCapText.textContent = "Unlimited Sync";
           dailyCapPill.className = "quota-pill pro-pill";
           updateTagCounterLabel();
@@ -968,7 +968,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         licenseTier = "pro";
         headerTierBadge.textContent = "PRO";
         headerTierBadge.className = "tier-badge pro";
-        dailyCapIcon.textContent = "👑";
+        dailyCapIcon.textContent = "∞";
         dailyCapText.textContent = "Unlimited Sync";
         dailyCapPill.className = "quota-pill pro-pill";
         if (inlineTagLimitBanner) {
@@ -992,7 +992,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (isProUser) {
           headerTierBadge.textContent = "PRO";
           headerTierBadge.className = "tier-badge pro";
-          dailyCapIcon.textContent = "👑";
+          dailyCapIcon.textContent = "∞";
           dailyCapText.textContent = "Unlimited Sync";
           dailyCapPill.className = "quota-pill pro-pill";
           if (inlineTagLimitBanner) {
