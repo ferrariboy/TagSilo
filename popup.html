@@ -120,7 +120,18 @@
         <div class="surface-header">
           <span class="section-label">Pipeline Group</span>
         </div>
-        <select id="groupSelect" class="studio-select">
+        <div class="custom-dropdown-wrap" id="customGroupDropdownWrap">
+          <button type="button" class="custom-dropdown-trigger" id="customGroupTrigger">
+            <span id="customGroupSelectedText">Select target pipeline...</span>
+            <svg class="dropdown-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="custom-dropdown-menu" id="customGroupMenu" style="display: none;">
+            <!-- Dynamically populated options -->
+          </div>
+        </div>
+        <select id="groupSelect" class="studio-select" style="display: none;">
           <option value="">Select target pipeline...</option>
         </select>
       </section>

@@ -109,6 +109,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Pipeline Group Controls
   const groupSelect = document.getElementById("groupSelect");
   const manageGroupsBtn = document.getElementById("manageGroupsBtn");
+  const customGroupDropdownWrap = document.getElementById("customGroupDropdownWrap");
+  const customGroupTrigger = document.getElementById("customGroupTrigger");
+  const customGroupSelectedText = document.getElementById("customGroupSelectedText");
+  const customGroupMenu = document.getElementById("customGroupMenu");
 
   // Tag Management Elements
   const activeTagsBox = document.getElementById("activeTagsBox");
@@ -519,13 +523,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (rec.group) {
           const matchOpt = Array.from(groupSelect.options).find(o => o.value === rec.group);
           if (matchOpt) {
-            groupSelect.value = rec.group;
+            selectPipelineGroup(rec.group, matchOpt.textContent, false);
           } else {
             const opt = document.createElement("option");
             opt.value = rec.group;
             opt.textContent = rec.group;
             groupSelect.appendChild(opt);
-            groupSelect.value = rec.group;
+            selectPipelineGroup(rec.group, rec.group, false);
           }
         }
 
@@ -736,31 +740,99 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // 5. Pipeline Group Management & Dropdown Renderer
+  // 5. Pipeline Group Management & Custom Studio Dropdown Renderer
   function renderPipelineGroups() {
-    groupSelect.innerHTML = '<option value="" style="font-size: 11px !important; font-size: 0.52rem !important; background: #0F172A; color: #F8FAFC;">Select target pipeline...</option>';
+    groupSelect.innerHTML = '<option value="">Select target pipeline...</option>';
+    if (customGroupMenu) customGroupMenu.innerHTML = "";
+
     pipelineGroups.forEach((groupName, idx) => {
+      const isDefault = idx === 0;
+      const isLocked = !isProUser && idx > 0;
+      const labelText = isLocked ? `🔒 ${groupName} (Pro)` : (isDefault ? `${groupName} (Default)` : groupName);
+
+      // 1. Native option for background code & form sync
       const option = document.createElement("option");
       option.value = groupName;
-      option.style.setProperty("font-size", "11px", "important");
-      option.style.setProperty("font-family", "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", "important");
-      option.style.backgroundColor = "#0F172A";
-      option.style.color = "#F8FAFC";
-
-      if (!isProUser && idx > 0) {
-        option.textContent = `🔒 ${groupName} (Pro)`;
-        option.dataset.pro = "true";
-      } else {
-        option.textContent = idx === 0 ? `${groupName} (Default)` : groupName;
-        option.dataset.pro = "false";
-      }
+      option.textContent = labelText;
+      option.dataset.pro = isLocked ? "true" : "false";
       groupSelect.appendChild(option);
+
+      // 2. Custom dropdown item for 100% pixel-perfect font rendering
+      if (customGroupMenu) {
+        const item = document.createElement("div");
+        item.className = "custom-dropdown-item" + (isLocked ? " pro-locked" : "");
+        item.dataset.value = groupName;
+        item.dataset.pro = isLocked ? "true" : "false";
+        item.textContent = labelText;
+
+        item.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (isLocked) {
+            showPaywallModal("Custom pipeline groups are unlocked exclusively for TagSilo Pro members. Upgrade to manage unlimited segmented tracking lists.");
+            closeCustomDropdown();
+            return;
+          }
+          selectPipelineGroup(groupName, labelText);
+          closeCustomDropdown();
+        });
+
+        customGroupMenu.appendChild(item);
+      }
     });
 
-    if (groupSelect.options.length > 1) {
+    if (pipelineGroups.length > 0) {
       groupSelect.selectedIndex = 1;
+      const firstGroup = pipelineGroups[0];
+      selectPipelineGroup(firstGroup, `${firstGroup} (Default)`, false);
+    } else {
+      selectPipelineGroup("", "Select target pipeline...", false);
     }
   }
+
+  function selectPipelineGroup(value, displayText, triggerChange = true) {
+    groupSelect.value = value;
+    if (customGroupSelectedText) {
+      customGroupSelectedText.textContent = displayText || value || "Select target pipeline...";
+    }
+    if (customGroupMenu) {
+      customGroupMenu.querySelectorAll(".custom-dropdown-item").forEach((item) => {
+        item.classList.toggle("selected", item.dataset.value === value);
+      });
+    }
+    if (triggerChange) {
+      groupSelect.dispatchEvent(new Event("change"));
+    }
+  }
+
+  function toggleCustomDropdown(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!customGroupMenu) return;
+    const isOpen = customGroupMenu.style.display === "flex";
+    if (isOpen) {
+      closeCustomDropdown();
+    } else {
+      customGroupMenu.style.display = "flex";
+      if (customGroupTrigger) customGroupTrigger.classList.add("open");
+    }
+  }
+
+  function closeCustomDropdown() {
+    if (customGroupMenu) customGroupMenu.style.display = "none";
+    if (customGroupTrigger) customGroupTrigger.classList.remove("open");
+  }
+
+  if (customGroupTrigger) {
+    customGroupTrigger.addEventListener("click", toggleCustomDropdown);
+  }
+
+  document.addEventListener("click", (e) => {
+    if (customGroupDropdownWrap && !customGroupDropdownWrap.contains(e.target)) {
+      closeCustomDropdown();
+    }
+  });
 
   groupSelect.addEventListener("change", (e) => {
     const selectedOption = groupSelect.options[groupSelect.selectedIndex];
