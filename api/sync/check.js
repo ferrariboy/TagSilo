@@ -17,25 +17,43 @@ module.exports = async (req, res) => {
       return res.status(200).json({ success: true, exists: false });
     }
 
-    const cleanTargetUrl = profileUrl.split("?")[0].replace(/\/$/, "").toLowerCase();
-    const readUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/All_Pipelines!A:G`;
+    const cleanTarget = (profileUrl || "")
+      .split("?")[0]
+      .split("#")[0]
+      .replace(/^https?:\/\/(www\.)?linkedin\.com/i, "")
+      .replace(/\/$/, "")
+      .toLowerCase();
 
-    const sheetRes = await fetch(readUrl, {
-      headers: { Authorization: `Bearer ${authToken}` }
-    });
+    const candidateRanges = ["All_Pipelines!A:G", "Prospects!A:G", "Sheet1!A:G", "A:G"];
+    let rows = [];
 
-    if (!sheetRes.ok) {
-      return res.status(200).json({ success: true, exists: false });
+    for (const rng of candidateRanges) {
+      try {
+        const readUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(rng)}`;
+        const sheetRes = await fetch(readUrl, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        if (sheetRes.ok) {
+          const sheetData = await sheetRes.json();
+          if (Array.isArray(sheetData.values) && sheetData.values.length > 1) {
+            rows = sheetData.values;
+            break;
+          }
+        }
+      } catch (e) {}
     }
-
-    const sheetData = await sheetRes.json();
-    const rows = sheetData.values || [];
 
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
-      const rowUrl = (row[2] || "").split("?")[0].replace(/\/$/, "").toLowerCase();
+      const rowRawUrl = (row[2] || "").toString();
+      const rowClean = rowRawUrl
+        .split("?")[0]
+        .split("#")[0]
+        .replace(/^https?:\/\/(www\.)?linkedin\.com/i, "")
+        .replace(/\/$/, "")
+        .toLowerCase();
 
-      if (rowUrl && (rowUrl === cleanTargetUrl || cleanTargetUrl.includes(rowUrl) || rowUrl.includes(cleanTargetUrl))) {
+      if (rowClean && cleanTarget && (rowClean === cleanTarget || cleanTarget.includes(rowClean) || rowClean.includes(cleanTarget))) {
         return res.status(200).json({
           success: true,
           exists: true,

@@ -77,8 +77,8 @@ body {
   max-height: 520px;
   display: flex;
   flex-direction: column;
-  padding: 9px 11px;
-  gap: 6px;
+  padding: 8px 10px;
+  gap: 5px;
   position: relative;
   overflow: hidden !important;
   box-sizing: border-box;
@@ -94,7 +94,7 @@ body {
   border: 1px solid var(--accent-lime);
   box-shadow: 0 4px 18px rgba(166, 255, 38, 0.25);
   border-radius: var(--radius-md);
-  padding: 7px 11px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -118,18 +118,18 @@ body {
 .toast-icon {
   color: var(--accent-lime);
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .toast-text {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .toast-link {
   color: var(--accent-lime);
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
@@ -145,26 +145,26 @@ body {
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-outer);
   box-shadow: var(--shadow-surface);
-  border-radius: var(--radius-md);
-  padding: 6px 9px;
+  border-radius: 7px;
+  padding: 5px 8px;
   flex-shrink: 0;
 }
 
 .brand-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .brand-wordmark {
-  height: 17px;
+  height: 15px;
   width: auto;
   display: block;
   object-fit: contain;
 }
 
 .version-tag {
-  font-size: 0.58rem;
+  font-size: 0.54rem;
   font-weight: 700;
   color: var(--accent-cyan);
   background: var(--accent-cyan-dim);
@@ -176,9 +176,9 @@ body {
 }
 
 .tier-badge {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 800;
-  padding: 2px 5px;
+  padding: 1.5px 4px;
   border-radius: 3px;
   letter-spacing: 0.4px;
   text-transform: uppercase;
@@ -209,9 +209,9 @@ body {
   gap: 3px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-outer);
-  padding: 2px 6px;
+  padding: 1.5px 5px;
   border-radius: var(--radius-pill);
-  font-size: 0.66rem;
+  font-size: 0.60rem;
   font-weight: 600;
   color: var(--text-primary);
   transition: all 0.2s ease;
@@ -265,7 +265,7 @@ body {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 1px;
@@ -289,11 +289,11 @@ body {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-outer);
   box-shadow: var(--shadow-surface);
-  border-radius: var(--radius-md);
-  padding: 7px 9px;
+  border-radius: 7px;
+  padding: 5px 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .surface-header {
@@ -303,11 +303,11 @@ body {
 }
 
 .section-label {
-  font-size: 0.625rem;
+  font-size: 0.58rem;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: #64748B;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 .header-tools {
@@ -442,7 +442,7 @@ body {
   border: none;
   border-bottom: 1px solid transparent;
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 700;
   font-family: inherit;
   width: 100%;
@@ -457,7 +457,7 @@ body {
 }
 
 .lead-title-field {
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   color: var(--text-secondary);
   line-height: 1.2;
   display: -webkit-box;
@@ -472,12 +472,12 @@ body {
 .meta-pills-row {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .meta-pill {
-  font-size: 0.66rem;
-  padding: 2px 6px;
+  font-size: 0.60rem;
+  padding: 1.5px 5px;
   border-radius: var(--radius-xs);
   white-space: nowrap;
   overflow: hidden;
@@ -507,11 +507,11 @@ body {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 0.6rem;
+  font-size: 0.56rem;
   font-weight: 600;
   color: var(--accent-cyan);
   background: var(--accent-cyan-dim);
-  padding: 1px 5px;
+  padding: 1px 4px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(56, 189, 248, 0.2);
 }
@@ -527,11 +527,11 @@ body {
 .record-found-banner {
   display: none;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: rgba(37, 99, 235, 0.16);
   border: 1px solid rgba(59, 130, 246, 0.35);
   color: #93C5FD;
-  padding: 4px 7px;
+  padding: 3px 6px;
   border-radius: var(--radius-xs);
   margin-top: 1px;
 }
@@ -547,26 +547,26 @@ body {
 
 .record-found-text strong {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #60A5FA;
 }
 
 .record-found-text span {
-  font-size: 0.66rem;
+  font-size: 0.62rem;
   opacity: 0.9;
 }
 
 /* 3. Destination Pipeline Select */
 .studio-select {
   width: 100%;
-  height: 28px;
+  height: 25px;
   background: var(--surface-inner);
   border: 1px solid var(--border-outer);
   border-radius: var(--radius-xs);
-  padding: 4px 7px;
+  padding: 2px 6px;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   outline: none;
   cursor: pointer;
   appearance: none;
@@ -591,7 +591,7 @@ body {
 
 /* 4. Semantic Tags Taxonomy */
 .tag-counter-label {
-  font-size: 0.64rem;
+  font-size: 0.60rem;
   color: var(--text-secondary);
 }
 
@@ -599,24 +599,24 @@ body {
   background: var(--surface-inner);
   border: 1px dashed var(--border-outer);
   border-radius: var(--radius-xs);
-  min-height: 25px;
-  padding: 3px 5px;
+  min-height: 23px;
+  padding: 2px 4px;
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
   align-items: center;
 }
 
 .tag-pill, .active-tag-pill {
   background: var(--primary-blue);
   color: #FFFFFF;
-  padding: 2px 7px;
+  padding: 1.5px 6px;
   border-radius: var(--radius-pill);
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .tag-dot {
@@ -628,7 +628,7 @@ body {
 
 .active-tag-remove {
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   line-height: 1;
   opacity: 0.8;
   margin-left: 2px;
@@ -640,7 +640,7 @@ body {
 }
 
 .empty-tags-hint {
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   color: var(--text-tertiary);
 }
 
@@ -652,13 +652,13 @@ body {
 
 .tag-input-field {
   flex: 1;
-  height: 24px;
+  height: 22px;
   background: var(--surface-inner);
   border: 1px solid var(--border-outer);
   border-radius: var(--radius-xs);
-  padding: 2px 6px;
+  padding: 2px 5px;
   color: var(--text-primary);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   outline: none;
 }
 
@@ -667,13 +667,13 @@ body {
 }
 
 .tag-add-button {
-  height: 24px;
+  height: 22px;
   background: rgba(51, 65, 85, 0.85);
   border: 1px solid var(--border-outer);
   color: var(--text-primary);
   border-radius: var(--radius-xs);
-  padding: 0 7px;
-  font-size: 0.68rem;
+  padding: 0 6px;
+  font-size: 0.65rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -685,13 +685,13 @@ body {
 
 .limit-alert-banner {
   display: none !important;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 600;
   color: #FCA5A5;
   background: rgba(239, 68, 68, 0.14);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: var(--radius-xs);
-  padding: 3px 6px;
+  padding: 3px 5px;
 }
 
 .limit-alert-banner.visible {
@@ -702,21 +702,21 @@ body {
 .presets-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
 }
 
 .quick-tag-btn {
   background: rgba(51, 65, 85, 0.4);
   border: 1px solid var(--border-outer);
   color: var(--text-secondary);
-  padding: 2px 5px 2px 7px;
+  padding: 1.5px 5px 1.5px 6px;
   border-radius: var(--radius-pill);
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 500;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   transition: all 0.15s ease;
   user-select: none;
 }
@@ -736,10 +736,10 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 13px;
-  height: 13px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  font-size: 0.72rem;
+  font-size: 0.70rem;
   line-height: 1;
   color: var(--text-tertiary);
   margin-left: 2px;
@@ -754,23 +754,23 @@ body {
 
 /* 6. Enrichment Notes Textarea */
 .char-count-label {
-  font-size: 0.64rem;
+  font-size: 0.60rem;
   color: var(--text-tertiary);
 }
 
 .notes-field {
   width: 100%;
-  height: 32px;
+  height: 28px;
   background: var(--surface-inner);
   border: 1px solid var(--border-outer);
   border-radius: var(--radius-xs);
-  padding: 4px 6px;
+  padding: 3px 5px;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   resize: none;
   outline: none;
-  line-height: 1.25;
+  line-height: 1.2;
   transition: border-color 0.15s ease;
 }
 
@@ -786,21 +786,21 @@ body {
 .popup-footer {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   padding-top: 1px;
   flex-shrink: 0;
 }
 
 .sync-action-btn {
   width: 100%;
-  height: 32px;
+  height: 29px;
   background: var(--primary-blue);
   color: #FFFFFF;
   border: none;
-  border-radius: var(--radius-md);
-  padding: 5px 10px;
+  border-radius: 6px;
+  padding: 4px 8px;
   font-family: inherit;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 700;
   cursor: pointer;
   box-shadow: var(--shadow-primary-btn);
@@ -813,7 +813,7 @@ body {
 
 .sync-action-btn:hover:not(:disabled) {
   background: var(--primary-blue-hover);
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.4);
 }
 
 .sync-action-btn:active:not(:disabled) {
@@ -826,8 +826,8 @@ body {
 }
 
 .action-spinner {
-  width: 13px;
-  height: 13px;
+  width: 12px;
+  height: 12px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: #FFFFFF;
   border-radius: 50%;
@@ -851,16 +851,22 @@ body {
 }
 
 .sheet-link {
-  font-size: 0.66rem;
-  font-weight: 600;
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: #64748B;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.sheet-link:hover {
   color: var(--accent-cyan);
   text-decoration: underline;
-  cursor: pointer;
 }
 
 .footer-telemetry {
-  font-size: 0.6rem;
-  color: var(--text-tertiary);
+  font-size: 0.58rem;
+  color: #64748B;
   letter-spacing: 0.2px;
   margin-left: auto;
 }

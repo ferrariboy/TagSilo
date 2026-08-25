@@ -141,41 +141,56 @@ async function checkExistingProfileInSheet(profileUrl, token) {
   const { active_google_sheet_id } = await chrome.storage.local.get("active_google_sheet_id");
   if (!active_google_sheet_id) return { exists: false };
 
-  try {
-    const range = encodeURIComponent("All_Pipelines!A:G");
-    let res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${active_google_sheet_id}/values/${range}`, {
-      headers: { Authorization: `Bearer ${authToken}` }
-    });
+  const cleanTarget = (profileUrl || "")
+    .split("?")[0]
+    .split("#")[0]
+    .replace(/^https?:\/\/(www\.)?linkedin\.com/i, "")
+    .replace(/\/$/, "")
+    .toLowerCase();
 
-    if (!res.ok) {
-      const fallbackRange = encodeURIComponent("A:G");
-      res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${active_google_sheet_id}/values/${fallbackRange}`, {
-        headers: { Authorization: `Bearer ${authToken}` }
-      });
+  try {
+    const candidateRanges = ["All_Pipelines!A:G", "Prospects!A:G", "Sheet1!A:G", "A:G"];
+    let rows = [];
+
+    for (const rng of candidateRanges) {
+      try {
+        const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${active_google_sheet_id}/values/${encodeURIComponent(rng)}`, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.values) && json.values.length > 1) {
+            rows = json.values;
+            break;
+          }
+        }
+      } catch (e) {}
     }
 
-    if (res.ok) {
-      const json = await res.json();
-      const rows = json.values || [];
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const rowRaw = (row[2] || "").toString();
+      const rowClean = rowRaw
+        .split("?")[0]
+        .split("#")[0]
+        .replace(/^https?:\/\/(www\.)?linkedin\.com/i, "")
+        .replace(/\/$/, "")
+        .toLowerCase();
 
-      for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        const rowUrl = (row[2] || "").split("?")[0].split("#")[0].replace(/\/$/, "").toLowerCase();
-        if (rowUrl && targetUrl && (rowUrl === targetUrl || targetUrl.includes(rowUrl) || rowUrl.includes(targetUrl))) {
-          return {
-            exists: true,
-            rowIndex: i + 1,
-            data: {
-              date: row[0] || "",
-              name: row[1] || "",
-              url: row[2] || "",
-              email: row[3] || "",
-              group: row[4] || "",
-              tags: row[5] || "",
-              notes: row[6] || ""
-            }
-          };
-        }
+      if (rowClean && cleanTarget && (rowClean === cleanTarget || cleanTarget.includes(rowClean) || rowClean.includes(cleanTarget))) {
+        return {
+          exists: true,
+          rowIndex: i + 1,
+          data: {
+            date: row[0] || "",
+            name: row[1] || "",
+            url: row[2] || "",
+            email: row[3] || "",
+            group: row[4] || "",
+            tags: row[5] || "",
+            notes: row[6] || ""
+          }
+        };
       }
     }
   } catch (err) {

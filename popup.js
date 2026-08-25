@@ -422,12 +422,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // 4. Anti-Duplicate Check in Google Sheets via Backend API
+  // 4. Anti-Duplicate Check in Google Sheets via Backend API & Direct Sheet Fallback
   async function checkDuplicateProfile(profileUrl) {
     if (!profileUrl || !profileUrl.includes("linkedin.com")) return;
 
     try {
-      const { active_google_sheet_id } = await chrome.storage.local.get("active_google_sheet_id");
+      const { active_google_sheet_id, tagsilo_google_access_token } = await chrome.storage.local.get([
+        "active_google_sheet_id",
+        "tagsilo_google_access_token"
+      ]);
+
+      const token = currentAuthToken || tagsilo_google_access_token;
+      if (!token || !active_google_sheet_id) return;
 
       let response = null;
       try {
@@ -435,9 +441,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            authToken: currentAuthToken,
+            authToken: token,
             profileUrl: profileUrl,
-            sheetId: active_google_sheet_id || null
+            sheetId: active_google_sheet_id
           })
         });
         if (res.ok) {
@@ -447,11 +453,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.warn("[TagSilo Pro] Backend check fallback note:", beErr.message);
       }
 
-      if (!response) {
+      if (!response || !response.exists) {
         response = await chrome.runtime.sendMessage({
           action: "CHECK_EXISTING_PROFILE",
           profileUrl: profileUrl,
-          googleAuthToken: currentAuthToken
+          googleAuthToken: token
         });
       }
 
@@ -943,6 +949,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           inlineTagLimitBanner.style.display = "none";
         }
         updateTagCounterLabel();
+        renderPipelineGroups();
         return;
       }
 
@@ -965,6 +972,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             inlineTagLimitBanner.classList.remove("visible");
             inlineTagLimitBanner.style.display = "none";
           }
+          renderPipelineGroups();
         } else {
           headerTierBadge.textContent = "FREE";
           headerTierBadge.className = "tier-badge free";
@@ -1870,7 +1878,96 @@ async function extractLinkedInMetadataInPage() {
     } catch (e) {}
   }
 
-  // 6C. Asynchronous Background Contact Info Fetch (Zero UI click, Zero photo popup, Zero navigation loop)
+  // 6C. Contact Info Modal Laser Trigger (Targets ONLY /overlay/contact-info/ link, excludes photos/avatars)
+  if (!email) {
+    try {
+      // 1. Check if Contact Info modal is already open
+      let modal = document.querySelector(".pv-contact-info") ||
+                  document.querySelector("section.ci-email") ||
+                  document.querySelector("#pv-contact-info") ||
+                  document.querySelector(".artdeco-modal");
+      if (modal) {
+        const mailtoModal = modal.querySelector('a[href^="mailto:"]');
+        if (mailtoModal) {
+          const raw = mailtoModal.href.replace(/^mailto:/i, "").split("?")[0].trim();
+          if (isUserEmail(raw)) email = raw;
+        }
+        if (!email) {
+          const found = findEmailInText(modal.innerText || modal.innerHTML);
+          if (found) email = found;
+        }
+      }
+
+      // 2. If modal not open, find and click ONLY the Contact Info link (strictly excluding photos/avatars)
+      if (!email) {
+        const isExcluded = (el) => {
+          if (!el) return true;
+          const cls = (el.className || "").toString().toLowerCase();
+          const aria = (el.getAttribute("aria-label") || "").toLowerCase();
+          if (cls.includes("photo") || cls.includes("picture") || cls.includes("avatar") || cls.includes("image") || cls.includes("profile-picture")) return true;
+          if (aria.includes("photo") || aria.includes("picture") || aria.includes("avatar") || aria.includes("image") || aria.includes("edit profile")) return true;
+          if (el.querySelector("img, picture, svg.pv-top-card-profile-picture")) return true;
+          return false;
+        };
+
+        let contactBtn = document.querySelector('a[href*="/overlay/contact-info/"]') ||
+                         document.querySelector('a#top-card-text-details-contact-info') ||
+                         document.querySelector('a.ember-view[href*="contact-info"]') ||
+                         document.querySelector('a[data-control-name="contact_see_more"]');
+
+        if (!contactBtn || isExcluded(contactBtn)) {
+          const candidateLinks = document.querySelectorAll(".pv-text-details__left-panel a, .ph5 a, main a");
+          for (const l of candidateLinks) {
+            if (isExcluded(l)) continue;
+            const href = (l.getAttribute("href") || "").toLowerCase();
+            const text = (l.innerText || l.textContent || "").trim().toLowerCase();
+            if (href.includes("overlay/contact-info") || text === "contact info" || (text.includes("contact info") && !text.includes("photo"))) {
+              contactBtn = l;
+              break;
+            }
+          }
+        }
+
+        if (contactBtn && !isExcluded(contactBtn)) {
+          contactBtn.click();
+
+          // Wait up to 1200ms for modal content to mount
+          const start = Date.now();
+          while (Date.now() - start < 1200) {
+            await new Promise((r) => setTimeout(r, 100));
+            const poppedModal = document.querySelector(".pv-contact-info") ||
+                                document.querySelector("section.ci-email") ||
+                                document.querySelector("#pv-contact-info") ||
+                                document.querySelector(".artdeco-modal");
+            if (poppedModal) {
+              const mailto = poppedModal.querySelector('a[href^="mailto:"]');
+              if (mailto) {
+                const raw = mailto.href.replace(/^mailto:/i, "").split("?")[0].trim();
+                if (isUserEmail(raw)) { email = raw; break; }
+              }
+              const found = findEmailInText(poppedModal.innerText || poppedModal.innerHTML);
+              if (found) { email = found; break; }
+            }
+          }
+
+          // Cleanly dismiss the modal after reading to leave page pristine
+          const poppedModal = document.querySelector(".artdeco-modal") || document.querySelector(".pv-contact-info");
+          if (poppedModal) {
+            const dismissBtn = poppedModal.querySelector('button[aria-label="Dismiss"]') ||
+                               poppedModal.querySelector('.artdeco-modal__dismiss') ||
+                               poppedModal.querySelector('button[data-test-modal-close-btn]');
+            if (dismissBtn) {
+              try { dismissBtn.click(); } catch (e) {}
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[TagSilo] In-page contact-info note:", e);
+    }
+  }
+
+  // 6D. Asynchronous Background Contact Info Fetch Fallback
   if (!email && location.hostname.includes("linkedin.com") && location.pathname.includes("/in/")) {
     try {
       const baseUrl = location.origin + location.pathname.replace(/\/overlay\/contact-info\/?.*$/i, "").replace(/\/$/, "");
@@ -1892,7 +1989,7 @@ async function extractLinkedInMetadataInPage() {
     } catch (err) {}
   }
 
-  // 6D. Fallback search in document text
+  // 6E. Fallback search in document text
   if (!email && document.body) {
     try {
       const found = findEmailInText(document.body.innerText || document.body.innerHTML || "");
