@@ -48,6 +48,9 @@ html {
   padding: 0 !important;
   overflow: hidden !important;
   box-sizing: border-box;
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  text-size-adjust: none;
 }
 
 body {
@@ -67,6 +70,9 @@ body {
   display: flex;
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  text-size-adjust: none;
   user-select: none;
   box-sizing: border-box;
 }
