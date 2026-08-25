@@ -180,7 +180,7 @@ body {
   color: var(--accent-cyan);
   background: var(--accent-cyan-dim);
   border: 1px solid rgba(56, 189, 248, 0.25);
-  padding: 1px 4px;
+  padding: 2.5px 5px;
   border-radius: var(--radius-xs);
   letter-spacing: 0.3px;
   line-height: 1.2;
@@ -189,7 +189,7 @@ body {
 .tier-badge {
   font-size: 0.55rem;
   font-weight: 800;
-  padding: 1.5px 4px;
+  padding: 2.5px 6px;
   border-radius: 3px;
   letter-spacing: 0.4px;
   text-transform: uppercase;
@@ -217,10 +217,10 @@ body {
 .quota-pill {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-outer);
-  padding: 1.5px 5px;
+  padding: 3px 7px;
   border-radius: var(--radius-pill);
   font-size: 0.60rem;
   font-weight: 600;
@@ -501,21 +501,22 @@ body {
 .meta-pills-row {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  margin-top: 3px;
+  gap: 4px;
+  margin-top: 4px;
 }
 
 .meta-pill {
-  font-size: 0.48rem;
+  font-size: 0.50rem;
   font-weight: 500;
-  padding: 2.5px 6px;
+  padding: 4px 8px;
+  min-height: 22px;
   border-radius: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   line-height: 1.2;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
@@ -541,12 +542,12 @@ body {
 .telemetry-badge {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   font-size: 0.54rem;
   font-weight: 600;
   color: var(--accent-cyan);
   background: var(--accent-cyan-dim);
-  padding: 1px 4px;
+  padding: 2.5px 6px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(56, 189, 248, 0.2);
 }
@@ -597,17 +598,19 @@ body {
   opacity: 0.9;
 }
 
-/* 3. Destination Pipeline Select */
+/* 3. Pipeline Group Select */
 .studio-select {
   width: 100%;
-  height: 25px;
+  height: 32px;
+  min-height: 32px;
   background: var(--surface-inner);
   border: 1px solid var(--border-outer);
   border-radius: var(--radius-xs);
-  padding: 2px 6px;
+  padding: 5px 28px 5px 8px;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 0.68rem;
+  font-size: 0.52rem;
+  line-height: 1.4;
   outline: none;
   cursor: pointer;
   appearance: none;
@@ -627,7 +630,8 @@ body {
 .studio-select option {
   background: #0F172A;
   color: #F8FAFC;
-  padding: 5px;
+  font-size: 0.52rem;
+  padding: 6px 8px;
 }
 
 /* 4. Profile Tags Taxonomy */
@@ -640,11 +644,11 @@ body {
   background: var(--surface-inner);
   border: 1px dashed rgba(166, 255, 38, 0.3);
   border-radius: var(--radius-xs);
-  min-height: 23px;
-  padding: 2px 4px;
+  min-height: 26px;
+  padding: 3px 5px;
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 4px;
   align-items: center;
 }
 
@@ -652,13 +656,14 @@ body {
   background: rgba(166, 255, 38, 0.16);
   border: 1px solid rgba(166, 255, 38, 0.45);
   color: var(--accent-lime);
-  padding: 1.5px 6px;
+  padding: 3.5px 8px;
+  min-height: 22px;
   border-radius: var(--radius-pill);
   font-size: 0.64rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   box-shadow: 0 0 8px rgba(166, 255, 38, 0.12);
 }
 
@@ -698,11 +703,11 @@ body {
 
 .tag-input-field {
   flex: 1;
-  height: 22px;
+  height: 24px;
   background: var(--surface-inner);
   border: 1px solid var(--border-outer);
   border-radius: var(--radius-xs);
-  padding: 2px 5px;
+  padding: 3px 6px;
   color: var(--text-primary);
   font-size: 0.65rem;
   outline: none;
@@ -714,12 +719,12 @@ body {
 }
 
 .tag-add-button {
-  height: 22px;
+  height: 24px;
   background: rgba(166, 255, 38, 0.12);
   border: 1px solid rgba(166, 255, 38, 0.35);
   color: var(--accent-lime);
   border-radius: var(--radius-xs);
-  padding: 0 6px;
+  padding: 0 8px;
   font-size: 0.65rem;
   font-weight: 600;
   cursor: pointer;
@@ -752,21 +757,22 @@ body {
 .presets-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 4px;
 }
 
 .quick-tag-btn {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
-  padding: 1.5px 5px 1.5px 6px;
+  padding: 3.5px 8px 3.5px 9px;
+  min-height: 22px;
   border-radius: var(--radius-pill);
   font-size: 0.64rem;
   font-weight: 500;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   transition: all 0.15s ease;
   user-select: none;
 }
@@ -812,22 +818,24 @@ body {
 
 .notes-field {
   width: 100%;
-  height: 28px;
+  height: 44px;
+  min-height: 44px;
   background: var(--surface-inner);
   border: 1px solid var(--border-outer);
   border-radius: var(--radius-xs);
-  padding: 3px 5px;
+  padding: 5px 7px;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 0.66rem;
-  resize: none;
+  font-size: 0.52rem;
+  resize: vertical;
   outline: none;
-  line-height: 1.2;
+  line-height: 1.35;
   transition: border-color 0.15s ease;
 }
 
 .notes-field:focus {
-  border-color: var(--primary-blue);
+  border-color: var(--accent-lime);
+  box-shadow: 0 0 0 2px rgba(166, 255, 38, 0.15);
 }
 
 .notes-field::placeholder {
