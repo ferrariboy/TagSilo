@@ -164,11 +164,11 @@ body {
 .brand-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 
 .brand-wordmark {
-  height: 20px;
+  height: 26px;
   width: auto;
   display: block;
   object-fit: contain;
@@ -425,36 +425,44 @@ body {
 }
 
 .lead-avatar-wrap {
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
 }
 
 .lead-avatar-img {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   border-radius: 50%;
   border: 1.5px solid rgba(56, 189, 248, 0.4);
   background: var(--surface-inner);
   object-fit: cover;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15), 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.18), 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .lead-avatar-fallback {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--accent-cyan-dim);
   color: var(--accent-cyan);
   font-weight: 800;
-  font-size: 13px;
+  font-size: 18px;
   border: 1.5px solid rgba(56, 189, 248, 0.4);
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.18);
 }
 
 .lead-text-meta {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   overflow: hidden;
 }
 
@@ -463,7 +471,7 @@ body {
   border: none;
   border-bottom: 1px solid transparent;
   color: var(--text-primary);
-  font-size: 0.78rem;
+  font-size: 0.80rem;
   font-weight: 700;
   font-family: inherit;
   width: 100%;
@@ -474,11 +482,11 @@ body {
 
 .lead-name-field:focus {
   outline: none;
-  border-bottom-color: var(--accent-cyan);
+  border-bottom-color: var(--accent-lime);
 }
 
 .lead-title-field {
-  font-size: 0.45rem;
+  font-size: 0.48rem;
   color: var(--text-secondary);
   line-height: 1.25;
   display: -webkit-box;
@@ -493,35 +501,40 @@ body {
 .meta-pills-row {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  margin-top: 3px;
 }
 
 .meta-pill {
-  font-size: 0.44rem;
-  padding: 1px 4px;
-  border-radius: var(--radius-xs);
+  font-size: 0.48rem;
+  font-weight: 500;
+  padding: 2.5px 6px;
+  border-radius: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   line-height: 1.2;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .url-pill {
   color: var(--accent-cyan);
-  background: var(--accent-cyan-dim);
+  background: rgba(56, 189, 248, 0.08);
   border: 1px solid rgba(56, 189, 248, 0.25);
 }
 
 .email-pill {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #6EE7B7;
+  background: rgba(166, 255, 38, 0.08);
+  border: 1px solid rgba(166, 255, 38, 0.25);
+  color: var(--accent-lime);
 }
 
 .email-pill.not-found {
   background: rgba(148, 163, 184, 0.08);
-  border-color: rgba(148, 163, 184, 0.2);
+  border: 1px solid rgba(148, 163, 184, 0.2);
   color: var(--text-secondary);
 }
 
@@ -607,8 +620,8 @@ body {
 }
 
 .studio-select:focus {
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 2px var(--border-focus);
+  border-color: var(--accent-lime);
+  box-shadow: 0 0 0 2px rgba(166, 255, 38, 0.2);
 }
 
 .studio-select option {
@@ -617,7 +630,7 @@ body {
   padding: 5px;
 }
 
-/* 4. Semantic Tags Taxonomy */
+/* 4. Profile Tags Taxonomy */
 .tag-counter-label {
   font-size: 0.60rem;
   color: var(--text-secondary);
@@ -625,7 +638,7 @@ body {
 
 .active-tags-surface {
   background: var(--surface-inner);
-  border: 1px dashed var(--border-outer);
+  border: 1px dashed rgba(166, 255, 38, 0.3);
   border-radius: var(--radius-xs);
   min-height: 23px;
   padding: 2px 4px;
@@ -636,21 +649,25 @@ body {
 }
 
 .tag-pill, .active-tag-pill {
-  background: var(--primary-blue);
-  color: #FFFFFF;
+  background: rgba(166, 255, 38, 0.16);
+  border: 1px solid rgba(166, 255, 38, 0.45);
+  color: var(--accent-lime);
   padding: 1.5px 6px;
   border-radius: var(--radius-pill);
   font-size: 0.64rem;
-  font-weight: 500;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 3px;
+  box-shadow: 0 0 8px rgba(166, 255, 38, 0.12);
 }
 
 .tag-dot {
   width: 4px;
   height: 4px;
   border-radius: 50%;
+  background: var(--accent-lime);
+  box-shadow: 0 0 4px var(--accent-lime);
   display: inline-block;
 }
 
@@ -658,13 +675,14 @@ body {
   cursor: pointer;
   font-size: 0.75rem;
   line-height: 1;
-  opacity: 0.8;
+  color: var(--accent-lime);
+  opacity: 0.85;
   margin-left: 2px;
 }
 
 .active-tag-remove:hover {
   opacity: 1;
-  color: #FCA5A5;
+  color: #EF4444;
 }
 
 .empty-tags-hint {
@@ -691,14 +709,15 @@ body {
 }
 
 .tag-input-field:focus {
-  border-color: var(--primary-blue);
+  border-color: var(--accent-lime);
+  box-shadow: 0 0 0 2px rgba(166, 255, 38, 0.2);
 }
 
 .tag-add-button {
   height: 22px;
-  background: rgba(51, 65, 85, 0.85);
-  border: 1px solid var(--border-outer);
-  color: var(--text-primary);
+  background: rgba(166, 255, 38, 0.12);
+  border: 1px solid rgba(166, 255, 38, 0.35);
+  color: var(--accent-lime);
   border-radius: var(--radius-xs);
   padding: 0 6px;
   font-size: 0.65rem;
@@ -708,7 +727,10 @@ body {
 }
 
 .tag-add-button:hover {
-  background: var(--primary-blue);
+  background: var(--accent-lime);
+  color: #080C14;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(166, 255, 38, 0.3);
 }
 
 .limit-alert-banner {
@@ -734,8 +756,8 @@ body {
 }
 
 .quick-tag-btn {
-  background: rgba(51, 65, 85, 0.4);
-  border: 1px solid var(--border-outer);
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
   padding: 1.5px 5px 1.5px 6px;
   border-radius: var(--radius-pill);
@@ -750,14 +772,16 @@ body {
 }
 
 .quick-tag-btn:hover {
-  background: rgba(71, 85, 105, 0.6);
-  color: var(--text-primary);
+  background: rgba(166, 255, 38, 0.08);
+  border-color: rgba(166, 255, 38, 0.4);
+  color: #F8FAFC;
 }
 
 .quick-tag-btn.active {
-  background: rgba(37, 99, 235, 0.25);
-  border-color: var(--primary-blue);
-  color: #93C5FD;
+  background: rgba(166, 255, 38, 0.2);
+  border-color: rgba(166, 255, 38, 0.65);
+  color: var(--accent-lime);
+  box-shadow: 0 0 10px rgba(166, 255, 38, 0.2);
 }
 
 .quick-tag-delete {

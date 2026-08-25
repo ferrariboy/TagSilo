@@ -548,7 +548,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!profileEmailBadge) return;
     if (isSearching) {
       profileEmailBadge.textContent = "Email: Searching...";
-      profileEmailBadge.className = "profile-url-badge profile-email-badge";
+      profileEmailBadge.className = "meta-pill email-pill";
       return;
     }
 
@@ -556,11 +556,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (clean && clean !== "Cannot Find" && clean !== "Unavailable" && clean !== "Searching...") {
       currentExtractedEmail = clean;
       profileEmailBadge.textContent = `Email: ${clean}`;
-      profileEmailBadge.className = "profile-url-badge profile-email-badge";
+      profileEmailBadge.className = "meta-pill email-pill";
     } else {
       currentExtractedEmail = "Cannot Find";
       profileEmailBadge.textContent = "Email: Cannot Find";
-      profileEmailBadge.className = "profile-url-badge profile-email-badge not-found";
+      profileEmailBadge.className = "meta-pill email-pill not-found";
     }
   }
 
@@ -1837,31 +1837,49 @@ async function extractLinkedInMetadataInPage() {
   }
 
   // -------------------------------------------------------------
-  // LAYER 5: AVATAR IMAGE EXTRACTION
+  // LAYER 5: AVATAR IMAGE EXTRACTION (Ultra Comprehensive)
   // -------------------------------------------------------------
   try {
+    // 1. Check meta tags
     if (!image) {
       const ogImg = document.querySelector('meta[property="og:image"]')?.getAttribute("content") ||
                     document.querySelector('meta[name="image"]')?.getAttribute("content") ||
                     document.querySelector('meta[name="twitter:image"]')?.getAttribute("content");
-      if (ogImg && !ogImg.includes("static.licdn.com/aero-v1/sc/h/")) image = ogImg;
-    }
-    if (!image) {
-      const imgEl = document.querySelector("img.pv-top-card-profile-picture__image") ||
-                    document.querySelector("img.profile-photo-edit__preview") ||
-                    document.querySelector("img.pv-top-card__photo") ||
-                    document.querySelector("img.EntityPhoto-profile-3") ||
-                    document.querySelector("img.EntityPhoto-profile-4") ||
-                    document.querySelector(".pv-top-card__non-self-photo-wrapper img") ||
-                    document.querySelector(".top-card-layout__entity-image") ||
-                    document.querySelector('img[alt*="profile" i]') ||
-                    document.querySelector('img[alt*="photo" i]');
-      if (imgEl && !imgEl.closest("#global-nav") && !imgEl.closest("nav") && !imgEl.closest("header")) {
-        const srcVal = imgEl.src || imgEl.getAttribute("data-delayed-url") || imgEl.getAttribute("data-src") || "";
-        if (srcVal && !srcVal.startsWith("data:image/svg") && !srcVal.includes("ghost")) image = srcVal;
+      if (ogImg && !ogImg.includes("static.licdn.com/aero-v1/sc/h/") && !ogImg.includes("ghost")) {
+        image = ogImg;
       }
     }
-  } catch (e) {}
+
+    // 2. Query all known LinkedIn profile picture selectors
+    if (!image) {
+      const sel = "img.pv-top-card-profile-picture__image, img.pv-top-card-profile-picture__image--show, button.pv-top-card-profile-picture img, button[aria-label*='profile picture' i] img, button[aria-label*='photo' i] img, img.profile-photo-edit__preview, img.pv-top-card__photo, img.EntityPhoto-profile-3, img.EntityPhoto-profile-4, img.presence-entity__image, .pv-top-card__non-self-photo-wrapper img, .top-card-layout__entity-image, .pv-top-card--photo img, img[class*='pv-top-card'], img[class*='profile-photo'], img[class*='profile-picture']";
+      const candidates = document.querySelectorAll(sel);
+
+      for (const el of candidates) {
+        if (el.closest("#global-nav") || el.closest("nav") || el.closest("header") || el.closest("footer")) continue;
+        const srcVal = el.src || el.getAttribute("data-delayed-url") || el.getAttribute("data-src") || "";
+        if (srcVal && !srcVal.startsWith("data:image/svg") && !srcVal.includes("ghost") && !srcVal.includes("static.licdn.com/aero-v1/sc/h/")) {
+          image = srcVal;
+          break;
+        }
+      }
+    }
+
+    // 3. Fallback: Query any licdn media image inside main top-card
+    if (!image) {
+      const mainImgs = document.querySelectorAll("main img, section.artdeco-card img, div.ph5 img, div.pv-top-card img");
+      for (const img of mainImgs) {
+        if (img.closest("#global-nav") || img.closest("nav") || img.closest("header") || img.closest("footer")) continue;
+        const src = img.src || img.getAttribute("data-delayed-url") || "";
+        if ((src.includes("media.licdn.com/dms/image/") || src.includes("profile-displayphoto")) && !src.includes("ghost")) {
+          image = src;
+          break;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[TagSilo] Avatar extraction note:", e);
+  }
 
   // -------------------------------------------------------------
   // LAYER 6: EMAIL EXTRACTION (SAFE & ISOLATED)
