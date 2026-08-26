@@ -1,0 +1,16 @@
+(function () {
+  var menuToggle=document.getElementById('menu-toggle'), mobileMenu=document.getElementById('mobile-menu');
+  menuToggle.addEventListener('click',function(){var open=mobileMenu.classList.toggle('open');menuToggle.setAttribute('aria-expanded',String(open));});
+  mobileMenu.querySelectorAll('a').forEach(function(link){link.addEventListener('click',function(){mobileMenu.classList.remove('open');menuToggle.setAttribute('aria-expanded','false');});});
+
+  document.querySelectorAll('.faq-trigger').forEach(function(button){button.addEventListener('click',function(){var item=button.closest('.faq-item'),wasOpen=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(function(openItem){openItem.classList.remove('open');openItem.querySelector('.faq-trigger').setAttribute('aria-expanded','false');});if(!wasOpen){item.classList.add('open');button.setAttribute('aria-expanded','true');}});});
+
+  var simName=document.getElementById('sim-name'),simGroup=document.getElementById('sim-group'),simNote=document.getElementById('sim-note'),selectedTags=new Set(['High Priority']);
+  function updateSimulator(){document.getElementById('record-name').textContent=simName.value.trim()||'Untitled profile';document.getElementById('record-group').textContent=simGroup.value;document.getElementById('record-tags').textContent=selectedTags.size+(selectedTags.size===1?' tag':' tags');document.getElementById('record-note').textContent=simNote.value.trim()||'Add the context that matters while it is fresh.';}
+  [simName,simGroup,simNote].forEach(function(input){input.addEventListener('input',updateSimulator);input.addEventListener('change',updateSimulator);});
+  document.querySelectorAll('.sim-tag').forEach(function(button){button.addEventListener('click',function(){var tag=button.dataset.tag;if(selectedTags.has(tag)){selectedTags.delete(tag);button.classList.remove('active');}else{selectedTags.add(tag);button.classList.add('active');}updateSimulator();});});
+
+  var leads=document.getElementById('roi-leads');function formatMinutes(min){if(min<60)return Math.round(min)+' min';var hrs=min/60;return(hrs%1===0?hrs.toFixed(0):hrs.toFixed(1))+' hr';}function updateRoi(){var count=Number(leads.value),weekly=count*1.5;document.getElementById('roi-leads-output').textContent=count;document.getElementById('roi-week').textContent=formatMinutes(weekly);document.getElementById('roi-month').textContent=formatMinutes(weekly*4.33);document.getElementById('roi-year').textContent=formatMinutes(weekly*52);}leads.addEventListener('input',updateRoi);updateRoi();
+
+  document.querySelectorAll('.billing-tab').forEach(function(button){button.addEventListener('click',function(){var annual=button.dataset.billing==='annual';document.querySelectorAll('.billing-tab').forEach(function(tab){tab.classList.toggle('active',tab===button);});document.getElementById('billing-note').textContent=annual?'Annual billing is coming soon. Monthly billing remains available now.':'Monthly billing is currently available.';document.getElementById('pro-price').innerHTML=annual?'— <small id="pro-period">Annual billing coming soon</small>':'$9.99 <small id="pro-period">/ month</small>';document.getElementById('pro-annual-message').classList.toggle('hidden',!annual);});});
+}());
