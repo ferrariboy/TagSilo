@@ -1,0 +1,3 @@
+- [x] Audit the copied project for missing image assets and invalid image references.
+- [x] Restore or relink broken images from the copied source bundle without altering external repositories.
+- [x] Verify the landing page renders all intended images correctly.
